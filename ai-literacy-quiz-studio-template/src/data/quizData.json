@@ -1,0 +1,360 @@
+{
+  "domains": [
+    {
+      "id": "engaging",
+      "title": "1번 문제 방",
+      "titleKo": "1번 문제 방",
+      "name": "Room 1",
+      "nameKo": "1번 문제 방",
+      "description": "첫 번째 방입니다. 문제를 풀고 다음 방의 자물쇠를 여세요.",
+      "descriptionKo": "첫 번째 방입니다. 문제를 풀고 다음 방의 자물쇠를 여세요.",
+      "requiredQuestionCount": 7,
+      "questions": [
+        {
+          "id": "E-1", "difficulty": "easy", "competence": "understanding", "competenceKo": "상황 파악",
+          "question": "[1번 방 미션] AI 도서 추천 로봇이 '만화책'만 추천하게 된 진짜 이유는 무엇일까요?",
+          "choices": [
+            "로봇이 사람처럼 만화책을 좋아해서",
+            "만화책 데이터를 훨씬 더 많이 입력해서",
+            "도서관에 동화책이 한 권도 없어서",
+            "로봇 시스템이 고장나서"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "철칵! 정답입니다. 첫 번째 단서를 얻었습니다!",
+          "feedbackWrong": "삐빅! 오답입니다. 로봇은 우리가 입력한 데이터의 양에 영향을 받아요.",
+          "explanation": "특정 데이터만 많이 주면 그 데이터에 치우친 결과(편향)를 내놓게 됩니다."
+        },
+        {
+          "id": "E-2", "difficulty": "easy", "competence": "concept", "competenceKo": "개념 발견",
+          "question": "[단서 1] 특정 종류의 데이터만 너무 많이 주어서 AI가 한쪽으로 치우친 생각을 하게 되는 현상을 무엇이라고 할까요?",
+          "choices": [
+            "데이터 편향",
+            "데이터 충전",
+            "인공지능 오류",
+            "가상 현실"
+          ],
+          "answerIndex": 0,
+          "feedbackCorrect": "정답! 한쪽으로 치우친 것을 '편향'이라고 부릅니다.",
+          "feedbackWrong": "오답입니다. 정답은 '데이터 편향'입니다.",
+          "explanation": "치우친 데이터를 '편향된 데이터'라고 합니다."
+        },
+        {
+          "id": "E-3", "difficulty": "easy", "competence": "understanding", "competenceKo": "단서 획득",
+          "question": "[단서 2] 바닥에 떨어진 로봇의 일기장을 발견했습니다. 빈칸에 들어갈 알맞은 말은? '나는 (   )를 먹고 똑똑해진다.'",
+          "choices": [
+            "전기",
+            "데이터",
+            "건전지",
+            "만화책"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! AI의 밥은 바로 데이터입니다.",
+          "feedbackWrong": "오답입니다. AI는 우리가 주는 정보(데이터)로 학습해요.",
+          "explanation": "인공지능은 수많은 데이터를 학습하여 판단을 내립니다."
+        },
+        {
+          "id": "E-4", "difficulty": "easy", "competence": "understanding", "competenceKo": "단서 획득",
+          "question": "[단서 3] 만약 로봇에게 1년 동안 '강아지 사진'만 1만 장 보여주며 학습시킨다면, 처음 보는 고양이 사진을 보았을 때 로봇은 어떻게 반응할까요?",
+          "choices": [
+            "고양이라고 정확히 맞힌다",
+            "강아지라고 잘못 판단할 확률이 높다",
+            "스스로 고양이 사진을 찾아서 공부한다",
+            "전원이 꺼진다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 학습하지 않은 것은 잘 모릅니다.",
+          "feedbackWrong": "오답입니다. AI는 배운 것 안에서만 생각해요.",
+          "explanation": "편향된 데이터만 학습하면 새로운 정보를 올바르게 판단하기 어렵습니다."
+        },
+        {
+          "id": "E-5", "difficulty": "easy", "competence": "solution", "competenceKo": "문제 해결",
+          "question": "[단서 4] 1번 방의 열쇠 조각을 맞추려면 올바른 문장을 찾아야 합니다. 다음 중 올바른 것은?",
+          "choices": [
+            "AI는 언제나 100% 공평하다.",
+            "AI는 사람이 준 데이터를 그대로 배우기 때문에 편견을 가질 수 있다.",
+            "데이터가 적을수록 AI는 더 똑똑해진다.",
+            "만화책 데이터만 주어도 AI는 스스로 동화책을 찾아 추천한다."
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! AI도 편견을 가질 수 있어요.",
+          "feedbackWrong": "오답입니다. AI는 완벽하지 않아요.",
+          "explanation": "인공지능은 입력된 데이터에 따라 편향될 수 있습니다."
+        },
+        {
+          "id": "E-6", "difficulty": "easy", "competence": "solution", "competenceKo": "해결 방안",
+          "question": "[단서 5] 소외되는 사람 없이 모두가 만족하는 AI를 만들려면 처음에 어떻게 해야 할까요?",
+          "choices": [
+            "가장 인기 있는 책 데이터만 모은다.",
+            "다양한 사람들의 의견과 데이터를 골고루 모은다.",
+            "데이터 모으는 것을 포기한다.",
+            "로봇을 부순다."
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 다양한 데이터가 중요합니다.",
+          "feedbackWrong": "오답입니다. 편향을 막으려면 골고루 모아야 해요.",
+          "explanation": "균형 잡힌 데이터가 공정한 AI를 만듭니다."
+        },
+        {
+          "id": "E-7", "difficulty": "easy", "competence": "final", "competenceKo": "방 탈출",
+          "question": "[1번 방 탈출문] 지금까지 얻은 단서를 모아 1번 방의 비밀번호를 맞춰주세요! 'AI에게 가장 필요한 데이터는 (   ) 데이터이다.'",
+          "choices": [
+            "다양한",
+            "부족한",
+            "재미있는",
+            "어려운"
+          ],
+          "answerIndex": 0,
+          "feedbackCorrect": "철칵! 1번 방을 탈출했습니다. 2번 방으로 가세요!",
+          "feedbackWrong": "삐빅! 비밀번호가 틀렸습니다. 골고루 모인 데이터의 성질을 생각해보세요.",
+          "explanation": "편향을 막기 위해서는 '다양한' 데이터가 필수적입니다."
+        }
+      ]
+    },
+    {
+      "id": "creating",
+      "title": "2번 문제 방",
+      "titleKo": "2번 문제 방",
+      "name": "Room 2",
+      "nameKo": "2번 문제 방",
+      "description": "두 번째 방입니다. 데이터 수집의 비밀을 풀고 자물쇠를 여세요.",
+      "descriptionKo": "두 번째 방입니다. 데이터 수집의 비밀을 풀고 자물쇠를 여세요.",
+      "requiredQuestionCount": 5,
+      "questions": [
+        {
+          "id": "C-1", "difficulty": "easy", "competence": "concept", "competenceKo": "개념 발견",
+          "question": "[2번 방 미션] 이 방에는 만화책 데이터만 가득합니다. 편향을 없애려면 어떻게 해야 할까요?",
+          "choices": [
+            "만화책 데이터를 더 많이 모은다",
+            "동화책, 과학책 등 다른 종류의 책 데이터도 수집한다",
+            "데이터를 모두 버린다",
+            "컴퓨터를 끈다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "철칵! 정답입니다. 다음 단서를 얻었습니다!",
+          "feedbackWrong": "삐빅! 오답입니다. 한쪽으로 치우치지 않게 만들어야 해요.",
+          "explanation": "부족한 데이터를 보충하여 균형을 맞춰야 합니다."
+        },
+        {
+          "id": "C-2", "difficulty": "easy", "competence": "understanding", "competenceKo": "상황 파악",
+          "question": "[단서 1] 반 친구들이 좋아하는 책을 설문조사하여 데이터를 모으려고 합니다. 누구에게 물어봐야 할까요?",
+          "choices": [
+            "나와 친한 친구들에게만",
+            "만화책을 좋아하는 친구들에게만",
+            "반 친구들 모두에게 골고루",
+            "선생님에게만"
+          ],
+          "answerIndex": 2,
+          "feedbackCorrect": "정답! 모두의 의견이 중요합니다.",
+          "feedbackWrong": "오답입니다. 데이터는 특정 그룹에 치우치면 안 돼요.",
+          "explanation": "데이터 수집 시 다양한 대상을 포함해야 편향을 줄일 수 있습니다."
+        },
+        {
+          "id": "C-3", "difficulty": "easy", "competence": "solution", "competenceKo": "문제 해결",
+          "question": "[단서 2] 로봇에게 만화책과 같은 양의 동화책 데이터를 추가로 입력했습니다. 로봇은 이제 어떻게 변할까요?",
+          "choices": [
+            "만화책을 다 잊어버린다",
+            "만화책과 동화책을 골고루 추천할 수 있게 된다",
+            "과학책만 추천한다",
+            "아무것도 추천하지 못한다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 새로운 데이터를 학습하여 똑똑해졌어요.",
+          "feedbackWrong": "오답입니다. 새로운 데이터를 배우면 할 수 있는 일이 늘어나요.",
+          "explanation": "다양한 데이터를 입력하면 AI의 추천 범위도 다양해집니다."
+        },
+        {
+          "id": "C-4", "difficulty": "easy", "competence": "concept", "competenceKo": "AI 윤리",
+          "question": "[단서 3] AI를 훈련시킬 때 '나쁜 말'이나 '거짓 정보' 데이터를 넣으면 로봇은 어떻게 될까요?",
+          "choices": [
+            "나쁜 말과 거짓 정보를 그대로 따라 배우게 된다",
+            "스스로 나쁜 말임을 깨닫고 삭제한다",
+            "로봇이 갑자기 착해진다",
+            "전원이 꺼진다"
+          ],
+          "answerIndex": 0,
+          "feedbackCorrect": "정답! 그래서 나쁜 데이터를 거르는 것이 중요해요.",
+          "feedbackWrong": "오답입니다. AI는 스스로 선악을 구분하기 어려워요.",
+          "explanation": "AI는 입력된 데이터의 좋고 나쁨을 스스로 판단하지 못하고 그대로 학습합니다."
+        },
+        {
+          "id": "C-5", "difficulty": "easy", "competence": "final", "competenceKo": "방 탈출",
+          "question": "[2번 방 탈출문] 좋은 AI를 만들기 위해 우리는 데이터를 (   ) 수집해야 한다. 빈칸에 알맞은 말은?",
+          "choices": [
+            "대충 아무렇게나",
+            "나에게만 유리하게",
+            "다양하고 올바르게",
+            "돈을 주고 몰래"
+          ],
+          "answerIndex": 2,
+          "feedbackCorrect": "철칵! 2번 방 탈출 성공! 3번 방으로 가세요.",
+          "feedbackWrong": "삐빅! 데이터 수집의 기본 원칙을 다시 생각해보세요.",
+          "explanation": "데이터는 다양하고 윤리적으로 올바르게 수집되어야 합니다."
+        }
+      ]
+    },
+    {
+      "id": "managing",
+      "title": "3번 문제 방",
+      "titleKo": "3번 문제 방",
+      "name": "Room 3",
+      "nameKo": "3번 문제 방",
+      "description": "세 번째 방입니다. AI 관리자가 되어 자물쇠를 여세요.",
+      "descriptionKo": "세 번째 방입니다. AI 관리자가 되어 자물쇠를 여세요.",
+      "requiredQuestionCount": 5,
+      "questions": [
+        {
+          "id": "M-1", "difficulty": "easy", "competence": "solution", "competenceKo": "상황 대처",
+          "question": "[3번 방 미션] 로봇이 1학년 동생들에게 무서운 어른용 책을 자꾸 추천합니다! AI 관리자인 당신은 어떻게 해야 할까요?",
+          "choices": [
+            "로봇이 하는 일이니 그냥 둔다",
+            "왜 그런 책을 추천하는지 데이터를 확인하고 고친다",
+            "1학년 동생들에게 무서운 책을 읽으라고 강요한다",
+            "도서관 문을 닫는다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "철칵! 정답입니다. 멋진 AI 관리자네요!",
+          "feedbackWrong": "삐빅! 오답입니다. 로봇이 잘못된 판단을 하면 사람이 개입해야 해요.",
+          "explanation": "AI가 잘못된 결과를 낼 때는 원인이 되는 데이터를 찾아 수정해야 합니다."
+        },
+        {
+          "id": "M-2", "difficulty": "easy", "competence": "concept", "competenceKo": "책임감",
+          "question": "[단서 1] 우리가 만든 AI 로봇의 주인이자, 로봇의 행동에 책임을 져야 하는 사람은 누구일까요?",
+          "choices": [
+            "로봇 그 자체",
+            "도서관에 온 손님",
+            "로봇을 만들고 데이터를 준 우리들(사람)",
+            "외계인"
+          ],
+          "answerIndex": 2,
+          "feedbackCorrect": "정답! 인공지능의 책임은 결국 사람에게 있어요.",
+          "feedbackWrong": "오답입니다. 인공지능은 스스로 책임을 질 수 없어요.",
+          "explanation": "AI 시스템의 설계 및 운영 결과에 대한 책임은 항상 인간에게 있습니다."
+        },
+        {
+          "id": "M-3", "difficulty": "easy", "competence": "solution", "competenceKo": "태도",
+          "question": "[단서 2] 로봇이 실수로 잘못된 책을 추천했을 때, 우리가 가져야 할 올바른 태도는 무엇일까요?",
+          "choices": [
+            "로봇은 완벽해야 하므로 당장 버린다",
+            "AI도 실수할 수 있음을 인정하고, 더 나아지도록 데이터를 고친다",
+            "로봇의 실수를 다른 친구 탓으로 돌린다",
+            "무조건 로봇의 추천이 맞다고 우긴다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 꾸준히 고쳐나가는 것이 중요해요.",
+          "feedbackWrong": "오답입니다. 인공지능은 완벽한 마법의 상자가 아니에요.",
+          "explanation": "인공지능은 완벽하지 않으며, 지속적인 관리와 개선이 필요합니다."
+        },
+        {
+          "id": "M-4", "difficulty": "easy", "competence": "concept", "competenceKo": "AI 윤리",
+          "question": "[단서 3] AI 로봇에게 데이터를 줄 때 지켜야 할 '예절(윤리)'이 아닌 것은 무엇일까요?",
+          "choices": [
+            "친구의 일기장을 허락 없이 몰래 로봇에게 입력한다",
+            "정확하고 사실인 정보만 입력하려고 노력한다",
+            "누군가를 차별하거나 놀리는 데이터는 넣지 않는다",
+            "개인정보가 유출되지 않도록 조심한다"
+          ],
+          "answerIndex": 0,
+          "feedbackCorrect": "정답! 개인정보를 마음대로 쓰면 안 돼요.",
+          "feedbackWrong": "오답입니다. 허락 없는 데이터 사용은 큰 문제가 됩니다.",
+          "explanation": "데이터를 수집하고 활용할 때는 타인의 개인정보와 동의를 존중해야 합니다."
+        },
+        {
+          "id": "M-5", "difficulty": "easy", "competence": "final", "competenceKo": "방 탈출",
+          "question": "[3번 방 탈출문] AI가 편향 없이 올바르게 작동하는지 우리는 계속 (   ) 해야 한다. 빈칸에 알맞은 말은?",
+          "choices": [
+            "방치하고 무시",
+            "감추고 숨기기",
+            "확인하고 관리",
+            "자랑하고 뽐내기"
+          ],
+          "answerIndex": 2,
+          "feedbackCorrect": "철칵! 3번 방 탈출 성공! 이제 마지막 방만 남았습니다.",
+          "feedbackWrong": "삐빅! AI를 만든 후 사람의 역할을 떠올려보세요.",
+          "explanation": "인공지능은 한 번 만들고 끝나는 것이 아니라 지속적인 모니터링이 필요합니다."
+        }
+      ]
+    },
+    {
+      "id": "designing",
+      "title": "마지막 탈출 방",
+      "titleKo": "마지막 탈출 방",
+      "name": "Final Room",
+      "nameKo": "마지막 탈출 방",
+      "description": "마지막 방입니다! 최종 설계도를 완성하고 도서관을 탈출하세요.",
+      "descriptionKo": "마지막 방입니다! 최종 설계도를 완성하고 도서관을 탈출하세요.",
+      "requiredQuestionCount": 5,
+      "questions": [
+        {
+          "id": "D-1", "difficulty": "easy", "competence": "solution", "competenceKo": "설계 계획",
+          "question": "[마지막 방 미션] 우리 반을 위한 '완벽한 AI 도서 추천 로봇'을 새롭게 만들려고 합니다. 가장 먼저 해야 할 일은 무엇일까요?",
+          "choices": [
+            "무작정 아무 책이나 스캔해서 넣는다",
+            "로봇의 겉모습만 예쁘게 색칠한다",
+            "어떤 목적과 규칙으로 공평한 데이터를 모을지 계획을 세운다",
+            "컴퓨터 게임을 하며 기다린다"
+          ],
+          "answerIndex": 2,
+          "feedbackCorrect": "철칵! 정답입니다. 훌륭한 설계자네요!",
+          "feedbackWrong": "삐빅! 오답입니다. 무엇이든 시작 전에는 계획이 필수입니다.",
+          "explanation": "AI 시스템 개발 전에는 명확한 목적과 공정성을 위한 규칙 수립이 선행되어야 합니다."
+        },
+        {
+          "id": "D-2", "difficulty": "easy", "competence": "concept", "competenceKo": "설계 원칙",
+          "question": "[단서 1] 소외되는 친구 없이 모두가 만족하는 로봇을 위한 최고의 규칙은 무엇일까요?",
+          "choices": [
+            "1등을 한 친구의 독서 취향만 반영한다",
+            "모든 친구들의 다양한 독서 취향을 존중하고 골고루 반영한다",
+            "가장 비싼 책만 추천하도록 한다",
+            "선생님이 좋아하는 책만 추천한다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 다양성 존중이 핵심입니다.",
+          "feedbackWrong": "오답입니다. 공평한 AI는 모두를 위해야 해요.",
+          "explanation": "사용자 모두의 다양성을 존중하고 반영하는 것이 포용적인 AI 설계의 핵심입니다."
+        },
+        {
+          "id": "D-3", "difficulty": "easy", "competence": "solution", "competenceKo": "테스트",
+          "question": "[단서 2] 완성된 AI 로봇을 도서관에 정식으로 놓기 전에 반드시 거쳐야 할 과정은 무엇일까요?",
+          "choices": [
+            "바로 전원을 켜고 집에 간다",
+            "여러 친구들과 함께 테스트하며 한쪽으로 치우친 문제는 없는지 살펴본다",
+            "아무도 못 쓰게 숨겨둔다",
+            "비싼 값에 팔아버린다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 꼼꼼한 테스트는 필수입니다.",
+          "feedbackWrong": "오답입니다. 출시 전 문제점을 찾는 과정이 꼭 필요해요.",
+          "explanation": "AI 시스템은 실제 적용 전 다양한 사용자 피드백을 통한 테스트와 검증이 필요합니다."
+        },
+        {
+          "id": "D-4", "difficulty": "easy", "competence": "concept", "competenceKo": "활용 태도",
+          "question": "[단서 3] AI는 완벽하지 않으며 데이터에 따라 편향될 수 있습니다. 앞으로 우리가 AI를 사용할 때 가져야 할 올바른 마음가짐은?",
+          "choices": [
+            "AI가 하는 말은 100% 무조건 다 믿는다",
+            "AI의 정보가 치우쳐 있을 수도 있다고 생각하며 비판적으로 바라본다",
+            "AI가 무서우니까 절대 사용하지 않는다",
+            "AI에게 내 숙제를 전부 다 해달라고 한다"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "정답! 스스로 생각하는 힘이 가장 중요합니다.",
+          "feedbackWrong": "오답입니다. 무조건 믿거나 피하는 것 둘 다 좋지 않아요.",
+          "explanation": "인공지능의 한계를 이해하고 비판적 사고를 바탕으로 주체적으로 활용해야 합니다."
+        },
+        {
+          "id": "D-5", "difficulty": "easy", "competence": "final", "competenceKo": "최종 탈출",
+          "question": "[최종 관문] 도서관을 완벽하게 탈출하기 위한 마지막 비밀번호를 선택하세요. (힌트: 우리의 목표)",
+          "choices": [
+            "로봇파괴",
+            "편향없는AI",
+            "만화책만세",
+            "데이터삭제"
+          ],
+          "answerIndex": 1,
+          "feedbackCorrect": "방탈출 성공! 축하합니다! 모든 미션을 완료했습니다!",
+          "feedbackWrong": "틀렸습니다. 괄호 안의 힌트를 잘 보세요.",
+          "explanation": "편향 없는 공정한 AI를 만드는 것이 우리의 최종 목표입니다!"
+        }
+      ]
+    }
+  ]
+}

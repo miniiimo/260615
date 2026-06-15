@@ -1,0 +1,113 @@
+{
+  "contentName": "AI Literacy School",
+  "entrance": {
+    "id": "entrance",
+    "title": "AI Literacy School",
+    "subtitle": "AI를 이해하고 판단하는 공간형 학습 캠퍼스",
+    "guide": "입장 후 중앙 광장에서 4개 학습 공간, 리포트 센터, 설문 정원으로 이동합니다.",
+    "position": "0 0 0",
+    "cameraPosition": "0 1.6 4",
+    "cameraRotation": "0 0 0",
+    "accent": "#7dd3fc"
+  },
+  "hub": {
+    "id": "hub",
+    "title": "Hub Plaza",
+    "titleKo": "중앙 광장",
+    "description": "AI Literacy School의 중심 광장입니다. 주변의 포털을 선택해 실제 공간으로 이동하세요.",
+    "position": "0 0 -20",
+    "cameraPosition": "0 1.6 -14",
+    "cameraRotation": "0 0 0",
+    "accent": "#7dd3fc",
+    "ui": {
+      "progress": {
+        "position": "0 1.7 1.48",
+        "scale": "1.02 1.02 1.02"
+      }
+    }
+  },
+  "spaces": [
+    {
+      "id": "engaging",
+      "domainId": "engaging",
+      "title": "Engaging with AI Hall",
+      "titleKo": "AI와 상호작용하기 홀",
+      "description": "추천, 검색, AI 판단, 편향과 영향을 탐험하는 공간",
+      "position": "-24 0 -45",
+      "cameraPosition": "-24 1.6 -39",
+      "cameraRotation": "0 0 0",
+      "accent": "#2563eb",
+      "kind": "domain",
+      "portalPosition": "-3.45 1.24 0.82",
+      "portalRotation": "0 28 0"
+    },
+    {
+      "id": "creating",
+      "domainId": "creating",
+      "title": "Creating with AI Studio",
+      "titleKo": "AI로 창작하기 스튜디오",
+      "description": "생성형 AI와 함께 아이디어를 만들고 다듬는 창작 공간",
+      "position": "24 0 -45",
+      "cameraPosition": "24 1.6 -39",
+      "cameraRotation": "0 0 0",
+      "accent": "#8b5cf6",
+      "kind": "domain",
+      "portalPosition": "3.45 1.24 0.82",
+      "portalRotation": "0 -28 0"
+    },
+    {
+      "id": "managing",
+      "domainId": "managing",
+      "title": "Managing AI Lab",
+      "titleKo": "AI 관리하기 랩",
+      "description": "AI 사용 여부와 위임, 지시, 점검을 연습하는 실험 공간",
+      "position": "-24 0 -75",
+      "cameraPosition": "-24 1.6 -69",
+      "cameraRotation": "0 0 0",
+      "accent": "#16a34a",
+      "kind": "domain",
+      "portalPosition": "-4.15 1.22 -1.55",
+      "portalRotation": "0 58 0"
+    },
+    {
+      "id": "designing",
+      "domainId": "designing",
+      "title": "Designing AI Workshop",
+      "titleKo": "AI 설계하기 워크숍",
+      "description": "데이터, 모델, 평가, 개선을 탐구하는 메이커스페이스",
+      "position": "24 0 -75",
+      "cameraPosition": "24 1.6 -69",
+      "cameraRotation": "0 0 0",
+      "accent": "#f97316",
+      "kind": "domain",
+      "portalPosition": "4.15 1.22 -1.55",
+      "portalRotation": "0 -58 0"
+    },
+    {
+      "id": "report",
+      "title": "Report Center",
+      "titleKo": "리포트 센터",
+      "description": "학습 결과와 강점, 보완 영역을 확인하는 대시보드 공간",
+      "position": "0 0 -105",
+      "cameraPosition": "0 1.6 -99",
+      "cameraRotation": "0 0 0",
+      "accent": "#12263f",
+      "kind": "report",
+      "portalPosition": "0 1.28 -3.55",
+      "portalRotation": "0 0 0"
+    },
+    {
+      "id": "survey",
+      "title": "Survey Garden",
+      "titleKo": "설문 정원",
+      "description": "학습 후 느낌과 의견을 차분히 남기는 성찰 공간",
+      "position": "0 0 -130",
+      "cameraPosition": "0 1.6 -124",
+      "cameraRotation": "0 0 0",
+      "accent": "#14b8a6",
+      "kind": "survey",
+      "portalPosition": "4.92 1.16 1.92",
+      "portalRotation": "0 -78 0"
+    }
+  ]
+}

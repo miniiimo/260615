@@ -1,0 +1,1033 @@
+{
+  "entrance": {
+    "group": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        0,
+        1.6,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        0,
+        2.28,
+        0.1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        0,
+        1.38,
+        2.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "startPanel": {
+      "position": [
+        0,
+        1.65,
+        1.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "hub": {
+    "group": {
+      "position": [
+        0,
+        0,
+        -20
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        0,
+        1.6,
+        -14
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        0,
+        2.34,
+        2.35
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        0,
+        1.18,
+        3.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "guidePanel": {
+      "position": [
+        -4.08,
+        1.28,
+        2.22
+      ],
+      "rotation": [
+        0,
+        26,
+        0
+      ]
+    },
+    "progressBoard": {
+      "position": [
+        0,
+        1.7,
+        1.48
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.02,
+        1.02,
+        1.02
+      ]
+    },
+    "routeRail": {
+      "position": [
+        0,
+        0.92,
+        2.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "portals": {
+      "engaging": {
+        "position": [
+          -3.45,
+          1.24,
+          0.82
+        ],
+        "rotation": [
+          0,
+          28,
+          0
+        ]
+      },
+      "creating": {
+        "position": [
+          3.45,
+          1.24,
+          0.82
+        ],
+        "rotation": [
+          0,
+          -28,
+          0
+        ]
+      },
+      "managing": {
+        "position": [
+          -4.15,
+          1.22,
+          -1.55
+        ],
+        "rotation": [
+          0,
+          58,
+          0
+        ]
+      },
+      "designing": {
+        "position": [
+          4.15,
+          1.22,
+          -1.55
+        ],
+        "rotation": [
+          0,
+          -58,
+          0
+        ]
+      },
+      "report": {
+        "position": [
+          0,
+          1.28,
+          -3.55
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "survey": {
+        "position": [
+          4.92,
+          1.16,
+          1.92
+        ],
+        "rotation": [
+          0,
+          -78,
+          0
+        ]
+      }
+    }
+  },
+  "engaging": {
+    "group": {
+      "position": [
+        -24,
+        0,
+        -45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        -24,
+        1.6,
+        -39
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4.2,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        4,
+        1.02,
+        0.6
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "guidePanel": {
+      "position": [
+        4.08,
+        1.62,
+        -0.78
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "quizPanel": {
+      "position": [
+        0,
+        1.58,
+        2.38
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "objectAnchors": {
+      "engaging_recommendation_board": {
+        "position": [
+          2.65,
+          1.08,
+          0.05
+        ],
+        "rotation": [
+          0,
+          -18,
+          0
+        ]
+      },
+      "engaging_search_board": {
+        "position": [
+          -2.75,
+          1.05,
+          0.28
+        ],
+        "rotation": [
+          0,
+          18,
+          0
+        ]
+      },
+      "engaging_bias_board": {
+        "position": [
+          0,
+          1.08,
+          -2.68
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "choiceCards": [
+      {
+        "position": [
+          -0.92,
+          -0.02,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.02,
+          0.34
+        ]
+      },
+      {
+        "position": [
+          -0.92,
+          -0.72,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.72,
+          0.34
+        ]
+      }
+    ],
+    "feedbackPanel": {
+      "position": [
+        2.34,
+        -0.34,
+        0.5
+      ],
+      "enterFrom": [
+        2.62,
+        -0.34,
+        0.28
+      ],
+      "width": 1.52,
+      "height": 1.3
+    },
+    "nextButton": {
+      "position": [
+        2.34,
+        -1.16,
+        0.58
+      ]
+    },
+    "closeButton": {
+      "position": [
+        1.56,
+        1.36,
+        0.34
+      ]
+    }
+  },
+  "creating": {
+    "group": {
+      "position": [
+        24,
+        0,
+        -45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        24,
+        1.6,
+        -39
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4.2,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        4,
+        1.02,
+        0.6
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "guidePanel": {
+      "position": [
+        4.08,
+        1.62,
+        -0.78
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "quizPanel": {
+      "position": [
+        0,
+        1.58,
+        2.38
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "objectAnchors": {
+      "creating_image_frame": {
+        "position": [
+          -2.35,
+          1.06,
+          -0.2
+        ],
+        "rotation": [
+          0,
+          16,
+          0
+        ]
+      },
+      "creating_idea_board": {
+        "position": [
+          0,
+          0.62,
+          -1.55
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "creating_copyright_board": {
+        "position": [
+          2.35,
+          1.06,
+          -0.2
+        ],
+        "rotation": [
+          0,
+          -16,
+          0
+        ]
+      }
+    },
+    "choiceCards": [
+      {
+        "position": [
+          -0.92,
+          -0.02,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.02,
+          0.34
+        ]
+      },
+      {
+        "position": [
+          -0.92,
+          -0.72,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.72,
+          0.34
+        ]
+      }
+    ],
+    "feedbackPanel": {
+      "position": [
+        2.34,
+        -0.34,
+        0.5
+      ],
+      "enterFrom": [
+        2.62,
+        -0.34,
+        0.28
+      ],
+      "width": 1.52,
+      "height": 1.3
+    },
+    "nextButton": {
+      "position": [
+        2.34,
+        -1.16,
+        0.58
+      ]
+    },
+    "closeButton": {
+      "position": [
+        1.56,
+        1.36,
+        0.34
+      ]
+    }
+  },
+  "managing": {
+    "group": {
+      "position": [
+        -24,
+        0,
+        -75
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        -24,
+        1.6,
+        -69
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4.2,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        4,
+        1.02,
+        0.6
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "guidePanel": {
+      "position": [
+        4.08,
+        1.62,
+        -0.78
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "quizPanel": {
+      "position": [
+        0,
+        1.58,
+        2.38
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "objectAnchors": {
+      "managing_decision_cards": {
+        "position": [
+          -2.15,
+          0.82,
+          -0.8
+        ],
+        "rotation": [
+          0,
+          16,
+          0
+        ]
+      },
+      "managing_prompt_bench": {
+        "position": [
+          0,
+          1.18,
+          -2.65
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "managing_plan_board": {
+        "position": [
+          2.15,
+          0.82,
+          -0.8
+        ],
+        "rotation": [
+          0,
+          -16,
+          0
+        ]
+      }
+    },
+    "choiceCards": [
+      {
+        "position": [
+          -0.92,
+          -0.02,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.02,
+          0.34
+        ]
+      },
+      {
+        "position": [
+          -0.92,
+          -0.72,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.72,
+          0.34
+        ]
+      }
+    ],
+    "feedbackPanel": {
+      "position": [
+        2.34,
+        -0.34,
+        0.5
+      ],
+      "enterFrom": [
+        2.62,
+        -0.34,
+        0.28
+      ],
+      "width": 1.52,
+      "height": 1.3
+    },
+    "nextButton": {
+      "position": [
+        2.34,
+        -1.16,
+        0.58
+      ]
+    },
+    "closeButton": {
+      "position": [
+        1.56,
+        1.36,
+        0.34
+      ]
+    }
+  },
+  "designing": {
+    "group": {
+      "position": [
+        24,
+        0,
+        -75
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        24,
+        1.6,
+        -69
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4.2,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        4,
+        1.02,
+        0.6
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "guidePanel": {
+      "position": [
+        4.08,
+        1.62,
+        -0.78
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "quizPanel": {
+      "position": [
+        0,
+        1.58,
+        2.38
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "objectAnchors": {
+      "designing_data_table": {
+        "position": [
+          -2.35,
+          0.75,
+          -0.65
+        ],
+        "rotation": [
+          0,
+          16,
+          0
+        ]
+      },
+      "designing_model_flow": {
+        "position": [
+          0,
+          1.22,
+          -2.35
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "designing_eval_board": {
+        "position": [
+          2.35,
+          0.75,
+          -0.65
+        ],
+        "rotation": [
+          0,
+          -16,
+          0
+        ]
+      }
+    },
+    "choiceCards": [
+      {
+        "position": [
+          -0.92,
+          -0.02,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.02,
+          0.34
+        ]
+      },
+      {
+        "position": [
+          -0.92,
+          -0.72,
+          0.3
+        ]
+      },
+      {
+        "position": [
+          0.92,
+          -0.72,
+          0.34
+        ]
+      }
+    ],
+    "feedbackPanel": {
+      "position": [
+        2.34,
+        -0.34,
+        0.5
+      ],
+      "enterFrom": [
+        2.62,
+        -0.34,
+        0.28
+      ],
+      "width": 1.52,
+      "height": 1.3
+    },
+    "nextButton": {
+      "position": [
+        2.34,
+        -1.16,
+        0.58
+      ]
+    },
+    "closeButton": {
+      "position": [
+        1.56,
+        1.36,
+        0.34
+      ]
+    }
+  },
+  "report": {
+    "group": {
+      "position": [
+        0,
+        0,
+        -105
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        0,
+        1.6,
+        -99
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        3.86,
+        1.02,
+        0.62
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "reportPanel": {
+      "position": [
+        0,
+        1.66,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "survey": {
+    "group": {
+      "position": [
+        0,
+        0,
+        -130
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "camera": {
+      "position": [
+        0,
+        1.6,
+        -124
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mainBoard": {
+      "position": [
+        -4,
+        1.98,
+        0.32
+      ],
+      "rotation": [
+        0,
+        58,
+        0
+      ]
+    },
+    "locationChip": {
+      "position": [
+        3.86,
+        1.02,
+        0.62
+      ],
+      "rotation": [
+        0,
+        -58,
+        0
+      ]
+    },
+    "surveyPanel": {
+      "position": [
+        0,
+        1.58,
+        1.55
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

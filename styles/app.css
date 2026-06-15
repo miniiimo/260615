@@ -1,0 +1,359 @@
+:root {
+  color-scheme: light;
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  --ui-surface: #f8fbff;
+  --ui-surface-elevated: #fbfdff;
+  --ui-navy: #12263f;
+  --ui-ink: #152b42;
+  --ui-muted: #536f87;
+  --ui-line: #c9d8e6;
+  --ui-sky: #7dd3fc;
+  --ui-violet: #8b5cf6;
+  --ui-radius: 16px;
+  --ui-shadow: 0 18px 46px rgba(15, 35, 58, 0.16);
+  background: #dbe9f4;
+  color: #142b3d;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+#scene-transition {
+  pointer-events: none;
+  position: fixed;
+  z-index: 25;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(125, 211, 252, 0.22), rgba(2, 6, 17, 0.18) 24%, rgba(2, 6, 17, 0.94) 68%),
+    #020611;
+  transition: opacity 300ms ease;
+}
+
+#scene-transition.is-active {
+  opacity: 1;
+}
+
+.topbar {
+  position: fixed;
+  z-index: 10;
+  left: 14px;
+  top: 14px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid rgba(126, 153, 178, 0.24);
+  border-radius: 999px;
+  background: rgba(251, 253, 255, 0.38);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(15, 35, 58, 0.08);
+  opacity: 0.24;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.topbar:hover,
+.topbar:focus-within {
+  opacity: 1;
+  transform: translateY(0);
+  background: rgba(251, 253, 255, 0.84);
+}
+
+.topbar a {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--ui-ink);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.topbar a:hover {
+  background: rgba(125, 211, 252, 0.18);
+}
+
+.system-message {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  box-sizing: border-box;
+  color: #17384d;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.system-message.error {
+  color: #7f1d1d;
+}
+
+.system-message pre {
+  max-width: min(760px, 90vw);
+  white-space: pre-wrap;
+  text-align: left;
+  line-height: 1.55;
+}
+
+.runtime-error {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: 24px;
+  max-width: min(720px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  padding: 14px 18px;
+  border: 1px solid rgba(185, 28, 28, 0.34);
+  border-radius: 14px;
+  background: rgba(254, 242, 242, 0.94);
+  color: #7f1d1d;
+  box-shadow: 0 18px 46px rgba(67, 20, 20, 0.18);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.runtime-warning {
+  border-color: rgba(14, 116, 144, 0.34);
+  background: rgba(236, 254, 255, 0.94);
+  color: #164e63;
+}
+
+/* Meta Quest에서 VR과 AR 진입 의도를 명확히 구분한다. */
+.xr-entry-controls {
+  position: fixed;
+  z-index: 40;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.xr-entry-button {
+  display: block !important;
+  position: relative;
+  width: 144px;
+  height: 54px;
+  padding: 8px 16px 8px 46px;
+  border: 1px solid rgba(125, 211, 252, 0.84) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 24px 50%, rgba(125, 211, 252, 0.24), transparent 20px),
+    linear-gradient(180deg, rgba(20, 29, 45, 0.94), rgba(7, 13, 25, 0.96)) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.10) inset,
+    0 0 24px rgba(125, 211, 252, 0.24),
+    0 14px 34px rgba(0, 0, 0, 0.36) !important;
+  color: #f8fbff;
+  cursor: pointer;
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  opacity: 0.92 !important;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease !important;
+}
+
+.xr-entry-button::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  width: 20px;
+  height: 14px;
+  transform: translateY(-50%);
+  border: 2px solid rgba(226, 246, 255, 0.96);
+  border-radius: 11px;
+  box-shadow: 0 0 12px rgba(125, 211, 252, 0.62);
+}
+
+.xr-entry-button-ar {
+  border-color: rgba(94, 234, 212, 0.84) !important;
+  background:
+    radial-gradient(circle at 24px 50%, rgba(94, 234, 212, 0.22), transparent 20px),
+    linear-gradient(180deg, rgba(13, 39, 44, 0.94), rgba(4, 22, 25, 0.96)) !important;
+}
+
+.xr-entry-button-ar::before {
+  border-color: rgba(209, 250, 244, 0.96);
+  box-shadow: 0 0 12px rgba(94, 234, 212, 0.62);
+}
+
+.xr-entry-kicker,
+.xr-entry-label {
+  display: block;
+  text-align: left;
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.xr-entry-kicker {
+  margin-bottom: 2px;
+  color: rgba(226, 246, 255, 0.68);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.xr-entry-label {
+  color: #f8fbff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 10px rgba(125, 211, 252, 0.40);
+}
+
+.xr-entry-button:hover,
+.xr-entry-button:focus-visible {
+  transform: translateY(-2px) scale(1.035) !important;
+  border-color: rgba(255, 255, 255, 0.94) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 0 32px rgba(125, 211, 252, 0.38),
+    0 18px 42px rgba(0, 0, 0, 0.42) !important;
+  opacity: 1 !important;
+}
+
+.xr-entry-button:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
+.xr-entry-button:disabled .xr-entry-label {
+  font-size: 14px;
+}
+
+.xr-entry-button.a-hidden {
+  display: block !important;
+}
+
+.a-enter-vr,
+.a-enter-ar {
+  display: none !important;
+}
+
+body[data-xr-session="active"] .xr-entry-controls {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .xr-entry-controls {
+    right: 14px;
+    bottom: 14px;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .xr-entry-button {
+    width: 136px;
+    height: 50px;
+  }
+}
+
+.anchor-debug-inspector {
+  position: fixed;
+  z-index: 35;
+  right: 16px;
+  top: 16px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 14px 16px;
+  border: 1px solid rgba(94, 129, 160, 0.34);
+  border-radius: 18px;
+  background: rgba(248, 251, 255, 0.82);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 22px 58px rgba(15, 35, 58, 0.18);
+  color: #10263b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.anchor-debug-inspector strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #0f253b;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.anchor-debug-inspector p {
+  margin: 6px 0;
+}
+
+.anchor-debug-inspector code {
+  padding: 1px 5px;
+  border-radius: 7px;
+  background: rgba(15, 35, 58, 0.08);
+  color: #12334d;
+}
+
+.anchor-debug-inspector small {
+  display: block;
+  margin-top: 10px;
+  color: #506b82;
+  font-weight: 900;
+}
+
+.anchor-debug-inspector ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anchor-debug-inspector li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 8px;
+  padding: 7px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.anchor-debug-inspector li span,
+.anchor-debug-inspector li code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anchor-debug-inspector li b {
+  color: #2563eb;
+  font-weight: 900;
+}
+
+.anchor-debug-inspector li code {
+  grid-column: 1 / -1;
+}
+
+/* The WebXR canvas owns the main screen. DOM chrome stays small so projection/VR view remains uncluttered. */
+@media (max-width: 640px) {
+  .topbar {
+    left: 8px;
+    top: 8px;
+  }
+
+  .anchor-debug-inspector {
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: 8px;
+    width: auto;
+    max-height: 45vh;
+  }
+}

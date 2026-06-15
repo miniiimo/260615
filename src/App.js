@@ -1393,3 +1393,2421 @@ export class VRQuizApp {
       new THREE.Color('#9d7bff'),
       new THREE.Color('#ffe7a3')
     ];
+
+    for (let index = 0; index < count; index += 1) {
+      const theta = rand() * Math.PI * 2;
+      const inCoreBand = rand() < 0.76;
+      const radius = inCoreBand
+        ? 6.4 + Math.pow(rand(), 0.52) * 7.0 + gaussianStatic(rand) * 0.48
+        : 8.8 + Math.pow(rand(), 0.72) * 13.6 + gaussianStatic(rand) * 1.12;
+      const wave = Math.sin(theta * 1.8 + 0.9) * 0.38 + Math.sin(theta * 4.2 - 0.35) * 0.18;
+      const y = 1.36 + wave + gaussianStatic(rand) * (inCoreBand ? 0.46 : 1.06);
+      const color = palette[Math.floor(rand() * palette.length)].clone();
+      const bright = rand() > 0.83;
+      const sparkle = rand() > 0.965;
+
+      positions[index * 3] = Math.cos(theta) * radius;
+      positions[index * 3 + 1] = y;
+      positions[index * 3 + 2] = Math.sin(theta) * radius;
+      colors[index * 3] = color.r;
+      colors[index * 3 + 1] = color.g;
+      colors[index * 3 + 2] = color.b;
+      sizes[index] = sparkle
+        ? 0.16 + rand() * 0.15
+        : bright
+          ? 0.065 + rand() * 0.075
+          : 0.018 + rand() * 0.035;
+      alphas[index] = sparkle
+        ? 0.74 + rand() * 0.22
+        : bright
+          ? 0.48 + rand() * 0.30
+          : 0.14 + rand() * 0.24;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute('aAlpha', new THREE.BufferAttribute(alphas, 1));
+
+    const material = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      depthTest: true,
+      vertexColors: true,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uPixelRatio: {value: Math.min(window.devicePixelRatio || 1, 2)},
+        uMaxPointSize: {value: 20}
+      },
+      vertexShader: `
+        uniform float uPixelRatio;
+        uniform float uMaxPointSize;
+        attribute float aSize;
+        attribute float aAlpha;
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+          vec4 viewPosition = viewMatrix * modelPosition;
+          gl_Position = projectionMatrix * viewPosition;
+
+          float perspective = 118.0 / max(0.45, -viewPosition.z);
+          gl_PointSize = clamp(aSize * perspective * uPixelRatio, 0.9, uMaxPointSize);
+          vColor = color;
+          vAlpha = aAlpha;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          vec2 uv = gl_PointCoord - vec2(0.5);
+          float d = length(uv);
+          float glow = smoothstep(0.5, 0.0, d);
+          float core = smoothstep(0.13, 0.0, d);
+          float cross = 0.0;
+          cross += smoothstep(0.014, 0.0, abs(uv.x)) * smoothstep(0.45, 0.0, abs(uv.y));
+          cross += smoothstep(0.014, 0.0, abs(uv.y)) * smoothstep(0.45, 0.0, abs(uv.x));
+          float alpha = (pow(glow, 1.45) + core * 0.46 + cross * 0.20) * vAlpha;
+          if (alpha < 0.01) discard;
+          gl_FragColor = vec4(vColor + core * 0.22, alpha);
+        }
+      `
+    });
+
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+
+    const entity = document.createElement('a-entity');
+    entity.id = 'panoramic-nebula-band';
+    entity.setObject3D('mesh', points);
+    entity.setAttribute('animation__nebula_drift', 'property: rotation; to: 0 -360 0; dur: 260000; easing: linear; loop: true');
+    this.environmentRoot.appendChild(entity);
+  }
+
+  seededRandom(seed) {
+    let value = seed >>> 0;
+    return () => {
+      value += 0x6D2B79F5;
+      let mixed = value;
+      mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+      mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+      return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  renderStudioShell() {
+    const palette = this.theme.palette || {};
+    const shell = document.createElement('a-entity');
+    shell.id = 'studio-shell';
+
+    STUDIO_FACE_ORDER.forEach((faceId) => {
+      const face = STUDIO_FACES[faceId];
+      const accent = this.getFaceAccent(faceId);
+      const backdrop = createPlane({
+        id: `studio-wall-${faceId}`,
+        width: 2.38,
+        height: 2.22,
+        position: createFacePose(face.angle, 1.78, 3.34).position,
+        rotation: face.rotation
+      });
+      backdrop.setAttribute('material', 'color: #edf5fa; shader: flat; side: double; transparent: true; opacity: 0.38');
+
+      const base = createPlane({
+        id: `studio-wall-base-${faceId}`,
+        width: 2.10,
+        height: 0.035,
+        position: '0 -1.00 0.012'
+      });
+      base.setAttribute('material', `color: ${accent}; shader: flat; transparent: true; opacity: 0.76`);
+
+      const rail = createPlane({
+        id: `studio-wall-rail-${faceId}`,
+        width: 0.026,
+        height: 1.58,
+        position: '-1.03 0.05 0.016'
+      });
+      rail.setAttribute('material', `color: ${accent}; shader: flat; transparent: true; opacity: 0.64`);
+
+      const labelPlate = createPlane({
+        id: `studio-wall-label-${faceId}`,
+        width: 0.34,
+        height: 0.035,
+        position: '0 -1.08 0.018'
+      });
+      labelPlate.setAttribute('material', `color: ${palette.navy || '#102235'}; shader: flat; transparent: true; opacity: 0.18`);
+
+      backdrop.append(base, rail, labelPlate);
+      shell.appendChild(backdrop);
+    });
+
+    const ceilingRing = document.createElement('a-torus');
+    ceilingRing.id = 'studio-ceiling-ring';
+    ceilingRing.setAttribute('radius', '2.82');
+    ceilingRing.setAttribute('radius-tubular', '0.006');
+    ceilingRing.setAttribute('segments-radial', '132');
+    ceilingRing.setAttribute('segments-tubular', '8');
+    ceilingRing.setAttribute('rotation', '90 0 0');
+    ceilingRing.setAttribute('position', '0 2.82 0');
+    ceilingRing.setAttribute('material', 'color: #9eb7cc; shader: flat; transparent: true; opacity: 0.34');
+    shell.appendChild(ceilingRing);
+
+    this.classroomRoot.appendChild(shell);
+  }
+
+  renderStudioUi() {
+    this.startPanel = new StartPanel({
+      theme: {
+        ...this.theme,
+        contentTitle: this.theme.contentTitle || '우리 반 AI 로봇의 비밀',
+        heroTitle: this.theme.heroTitle || this.theme.contentTitle || '우리 반 AI 로봇의 비밀',
+        subtitle: this.theme.subtitle || '',
+        startButtonText: this.theme.startButtonText || '시작하기'
+      },
+      onStart: () => this.withRuntimeGuard('영역 선택 시작', () => this.startIntroTransition())
+    });
+    this.startPanel.mount(this.classroomRoot);
+    this.startPanel.el.setAttribute('position', SECTION_POSES.start.position);
+    this.startPanel.el.setAttribute('rotation', SECTION_POSES.start.rotation);
+
+    this.introVideoPanel = new IntroVideoPanel({
+      theme: this.theme,
+      videoConfig: this.theme.introVideo,
+      onConfirm: () => this.withRuntimeGuard('사전 영상 확인 완료', () => this.confirmIntroVideo())
+    });
+    this.introVideoPanel.mount(this.classroomRoot);
+    this.introVideoPanel.attachVideoAsset(this.assetsRoot);
+
+    this.domainSelectRoot = document.createElement('a-entity');
+    this.domainSelectRoot.id = 'domain-select-ui';
+    this.domainSelectRoot.setAttribute('visible', 'false');
+    this.classroomRoot.appendChild(this.domainSelectRoot);
+    this.createDomainSelectUi();
+
+    this.resultPanel = new ResultPanel({
+      theme: this.theme,
+      onRestart: () => this.withRuntimeGuard('전체 다시 풀기', () => this.restart()),
+      onBack: () => this.withRuntimeGuard('영역 선택으로 돌아가기', () => this.showDomainSelect())
+    });
+    this.resultPanel.mount(this.classroomRoot);
+    this.resultPanel.el.setAttribute('position', SECTION_POSES.report.position);
+    this.resultPanel.el.setAttribute('rotation', SECTION_POSES.report.rotation);
+
+    this.surveyPanel = new SurveyPanel({
+      theme: this.theme,
+      onAnswer: (question, value) => this.withRuntimeGuard('설문 응답 저장', () => this.saveSurveyAnswer(question, value)),
+      onBack: () => this.withRuntimeGuard('영역 선택으로 돌아가기', () => this.showDomainSelect())
+    });
+    this.surveyPanel.mount(this.classroomRoot);
+    this.surveyPanel.el.setAttribute('position', SECTION_POSES.survey.position);
+    this.surveyPanel.el.setAttribute('rotation', SECTION_POSES.survey.rotation);
+
+    REQUIRED_DOMAIN_ORDER.forEach((domainId) => {
+      const quizPanel = new QuizPanel({
+        id: `quiz-panel-${domainId}`,
+        domainId,
+        theme: this.theme,
+        onChoice: (choiceIndex, panel, event) => this.withRuntimeGuard('선택지 선택', () => this.selectChoice(choiceIndex, panel, event)),
+        onNext: (panel) => this.withRuntimeGuard('다음 문제', () => this.goNext(panel)),
+        onClose: () => this.withRuntimeGuard('영역 선택으로 돌아가기', () => this.closeQuiz())
+    });
+      quizPanel.mount(this.classroomRoot);
+      this.quizPanels.set(domainId, quizPanel);
+    });
+
+    this.renderHomeButton();
+  }
+
+  renderHomeButton() {
+    if (!this.camera) return;
+    const accent = this.theme.palette?.cyan || '#38bdf8';
+    this.homeButton = createPlane({
+      id: 'home-button',
+      width: 0.58,
+      height: 0.17,
+      className: 'interactive home-button',
+      position: '-0.72 -0.54 -1.18',
+      rotation: '0 0 0'
+    });
+    applyTexture(this.homeButton, {
+      variant: 'button',
+      width: 520,
+      height: 150,
+      background: '#06111f',
+      border: accent,
+      accent,
+      title: '처음으로',
+      textColor: '#f8fbff',
+      titleSize: 29,
+      tokens: this.theme.ui || {}
+    });
+    bindInteractiveAction(this.homeButton, () => this.withRuntimeGuard('처음으로 돌아가기', () => this.returnToStart()));
+    bindHoverEffect(this.homeButton, {activeScale: '1.055 1.055 1'});
+    this.setGroupVisible(this.homeButton, false);
+    this.camera.appendChild(this.homeButton);
+  }
+
+  renderClassroomPlacementUi() {
+    if (!this.camera) return;
+    const palette = this.theme.palette || {};
+    const accent = palette.mint || '#5eead4';
+
+    this.placementRoot = document.createElement('a-entity');
+    this.placementRoot.id = 'classroom-placement-ui';
+    this.placementRoot.setAttribute('position', '0 0.28 -2.05');
+    this.placementRoot.setAttribute('visible', 'false');
+
+    this.placementPanel = createPlane({
+      id: 'classroom-placement-panel',
+      width: 1.82,
+      height: 0.92,
+      position: '0 0.14 0'
+    });
+    applyTexture(this.placementPanel, {
+      variant: 'panel',
+      width: 1100,
+      height: 560,
+      background: '#071827',
+      border: '#7dd3fc',
+      accent,
+      title: '교실 기준점 설정',
+      subtitle: '칠판 또는 수업 기준 방향을 바라보세요',
+      body: '기준점 설정을 누르면 현재 위치와 바라보는 방향을 기준으로 작은 퀴즈 핫스팟들이 나타납니다.',
+      footer: '교실이 바뀌면 다시 설정하면 됩니다.',
+      textColor: '#f8fbff',
+      mutedColor: '#c6d8e8',
+      titleSize: 54,
+      bodySize: 30,
+      bodyMaxLines: 3,
+      tokens: this.theme.ui || {}
+    });
+
+    this.placementButton = createPlane({
+      id: 'classroom-placement-button',
+      width: 0.86,
+      height: 0.24,
+      className: 'interactive classroom-placement-button',
+      position: '0 -0.44 0.08'
+    });
+    applyTexture(this.placementButton, {
+      variant: 'button',
+      width: 620,
+      height: 170,
+      background: '#102235',
+      border: '#7dd3fc',
+      accent,
+      title: '기준점 설정',
+      textColor: '#f8fbff',
+      titleSize: 30,
+      tokens: this.theme.ui || {}
+    });
+    bindInteractiveAction(this.placementButton, () => this.withRuntimeGuard('교실 기준점 설정', () => this.setClassroomAnchorFromView()));
+    bindHoverEffect(this.placementButton, {activeScale: '1.06 1.06 1'});
+
+    this.placementRoot.append(this.placementPanel, this.placementButton);
+    this.camera.appendChild(this.placementRoot);
+
+    this.classroomPanelPlacementRoot = document.createElement('a-entity');
+    this.classroomPanelPlacementRoot.id = 'classroom-panel-placement-ui';
+    this.classroomPanelPlacementRoot.setAttribute('position', '0 0.46 -2.10');
+    this.classroomPanelPlacementRoot.setAttribute('visible', 'false');
+
+    this.classroomPanelPlacementPlane = createPlane({
+      id: 'classroom-panel-placement-guide',
+      width: 1.78,
+      height: 0.78,
+      position: '0 0 0'
+    });
+
+    this.classroomLayoutDownloadButton = createPlane({
+      id: 'classroom-layout-download-button',
+      width: 0.84,
+      height: 0.22,
+      className: 'interactive classroom-layout-download-button',
+      position: '-0.46 -0.55 0.08'
+    });
+    applyTexture(this.classroomLayoutDownloadButton, {
+      variant: 'button',
+      width: 620,
+      height: 170,
+      background: '#102235',
+      border: '#7dd3fc',
+      accent: '#7dd3fc',
+      title: '배치 파일 다운로드',
+      textColor: '#f8fbff',
+      titleSize: 28,
+      tokens: this.theme.ui || {}
+    });
+    bindInteractiveAction(this.classroomLayoutDownloadButton, () => this.withRuntimeGuard('배치 파일 다운로드', () => this.downloadClassroomLayout()));
+    bindHoverEffect(this.classroomLayoutDownloadButton, {activeScale: '1.05 1.05 1'});
+
+    this.classroomPlacementDoneButton = createPlane({
+      id: 'classroom-placement-done-button',
+      width: 0.66,
+      height: 0.22,
+      className: 'interactive classroom-placement-done-button',
+      position: '0.48 -0.55 0.08'
+    });
+    applyTexture(this.classroomPlacementDoneButton, {
+      variant: 'button',
+      width: 520,
+      height: 170,
+      background: '#102235',
+      border: '#94a3b8',
+      accent: '#94a3b8',
+      title: '활동 화면',
+      textColor: '#f8fbff',
+      titleSize: 28,
+      tokens: this.theme.ui || {}
+    });
+    bindInteractiveAction(this.classroomPlacementDoneButton, () => this.withRuntimeGuard('활동 화면으로 이동', () => this.showDomainSelect()));
+    bindHoverEffect(this.classroomPlacementDoneButton, {activeScale: '1.05 1.05 1'});
+    this.setGroupVisible(this.classroomLayoutDownloadButton, false);
+    this.setGroupVisible(this.classroomPlacementDoneButton, false);
+
+    this.classroomPanelPlacementRoot.append(
+      this.classroomPanelPlacementPlane,
+      this.classroomLayoutDownloadButton,
+      this.classroomPlacementDoneButton
+    );
+    this.camera.appendChild(this.classroomPanelPlacementRoot);
+
+    this.classroomPlacementCapture = document.createElement('a-entity');
+    this.classroomPlacementCapture.id = 'classroom-placement-capture';
+    this.classroomPlacementCapture.setAttribute('visible', 'false');
+
+    this.classroomPlacementCaptureSphere = document.createElement('a-sphere');
+    this.classroomPlacementCaptureSphere.id = 'classroom-placement-capture-sphere';
+    this.classroomPlacementCaptureSphere.classList.add('interactive');
+    this.classroomPlacementCaptureSphere.setAttribute('radius', String(CLASSROOM_CAPTURE_RADIUS));
+    this.classroomPlacementCaptureSphere.setAttribute('segments-width', '96');
+    this.classroomPlacementCaptureSphere.setAttribute('segments-height', '48');
+    this.classroomPlacementCaptureSphere.setAttribute('position', `0 ${CLASSROOM_PANEL_Y} 0`);
+    this.classroomPlacementCaptureSphere.setAttribute(
+      'material',
+      'color: #7dd3fc; shader: flat; transparent: true; opacity: 0.012; side: double; depthWrite: false'
+    );
+
+    bindInteractiveAction(
+      this.classroomPlacementCaptureSphere,
+      (event) => this.withRuntimeGuard('패널 위치 배치', () => this.placeNextClassroomPanel(event)),
+      {
+        events: ['click', 'touchstart'],
+        shouldHandle: () => this.appMode === 'panelPlacement'
+      }
+    );
+
+    this.classroomPlacementCapture.appendChild(this.classroomPlacementCaptureSphere);
+    this.classroomRoot.appendChild(this.classroomPlacementCapture);
+  }
+
+  createDomainSelectUi() {
+    this.data.domains.forEach((domain) => {
+      const face = STUDIO_FACES[domain.id] || STUDIO_FACES.engaging;
+      const cardRoot = document.createElement('a-entity');
+      cardRoot.id = `domain-card-${domain.id}`;
+      cardRoot.dataset.domainId = domain.id;
+      cardRoot.setAttribute('position', face.position);
+      cardRoot.setAttribute('rotation', face.rotation);
+
+      const card = createPlane({
+        id: `domain-card-${domain.id}-surface`,
+        width: 2.08,
+        height: 1.18,
+        className: 'interactive domain-card domain-station',
+        position: '0 0 0.04'
+      });
+      const domainTheme = this.theme.domains?.[domain.id] || {};
+      const accent = domainTheme.accent || '#2563eb';
+      const frame = this.createStationFrame(`domain-card-${domain.id}`, accent, {width: 2.28, height: 1.34});
+      const halo = this.createGazeHalo(`domain-card-${domain.id}-halo`, accent, '0.78 -0.36 0.08', 0.18);
+      card.dataset.accent = accent;
+      card.dataset.swipeSurface = 'true';
+
+      card._gazeHalo = halo;
+      this.bindGazeSelectButton(card, () => this.withRuntimeGuard('영역 시작', () => this.openPoint(domain.id)), {
+        idle: () => this.domainStationTexture(domain, accent, false),
+        focused: () => this.domainStationTexture(domain, accent, true)
+      });
+      this.bindPanelSwipeSurface(card);
+
+      cardRoot.append(frame, card, halo);
+      this.addPanelSwipeHandles(cardRoot, accent, `domain-${domain.id}`);
+      this.domainSelectRoot.appendChild(cardRoot);
+      this.domainCards.set(domain.id, card);
+      this.domainCardButtons.set(domain.id, card);
+    });
+
+    this.progressFaceRoot = document.createElement('a-entity');
+    this.progressFaceRoot.id = 'progress-face-ui';
+    this.progressFaceRoot.setAttribute('position', STUDIO_FACES.progress.position);
+    this.progressFaceRoot.setAttribute('rotation', STUDIO_FACES.progress.rotation);
+    this.progressFacePlane = createPlane({
+      id: 'progress-face-dashboard',
+      width: 2.08,
+      height: 1.18,
+      position: '0 0.02 0.04'
+    });
+    const progressAccent = this.theme.palette?.cyan || '#38bdf8';
+    const progressFrame = this.createStationFrame('progress-face', progressAccent, {width: 2.28, height: 1.34});
+    this.progressFaceRoot.append(progressFrame, this.progressFacePlane);
+    this.domainSelectRoot.appendChild(this.progressFaceRoot);
+
+    this.frameworkEntryRoot = document.createElement('a-entity');
+    this.frameworkEntryRoot.id = 'framework-entry-ui';
+    this.frameworkEntryRoot.setAttribute('position', STUDIO_FACES.framework.position);
+    this.frameworkEntryRoot.setAttribute('rotation', STUDIO_FACES.framework.rotation);
+    this.frameworkEntryPlane = createPlane({
+      id: 'framework-entry-summary',
+      width: 2.08,
+      height: 1.08,
+      className: 'interactive studio-nav-button framework-station',
+      position: '0 0.02 0.04'
+    });
+    const frameworkAccent = this.theme.palette?.framework || '#ec4899';
+    const frameworkFrame = this.createStationFrame('framework-entry', frameworkAccent, {width: 2.28, height: 1.24});
+    this.frameworkEntryHalo = this.createGazeHalo('framework-entry-halo', frameworkAccent, '0.78 -0.34 0.08', 0.18);
+    this.frameworkEntryPlane._gazeHalo = this.frameworkEntryHalo;
+    this.frameworkEntryPlane.dataset.accent = frameworkAccent;
+    this.frameworkEntryPlane.dataset.swipeSurface = 'true';
+    this.frameworkEntryRoot.append(frameworkFrame, this.frameworkEntryPlane, this.frameworkEntryHalo);
+    this.addPanelSwipeHandles(this.frameworkEntryRoot, frameworkAccent, 'framework-entry');
+    this.domainSelectRoot.appendChild(this.frameworkEntryRoot);
+
+    this.surveyFaceRoot = document.createElement('a-entity');
+    this.surveyFaceRoot.id = 'survey-face-ui';
+    this.surveyFaceRoot.setAttribute('position', STUDIO_FACES.survey.position);
+    this.surveyFaceRoot.setAttribute('rotation', STUDIO_FACES.survey.rotation);
+    this.surveyFacePlane = createPlane({
+      id: 'survey-face-summary',
+      width: 2.08,
+      height: 1.08,
+      className: 'interactive studio-nav-button survey-station',
+      position: '0 0.02 0.04'
+    });
+    const surveyAccent = this.theme.palette?.mint || '#14b8a6';
+    const surveyFrame = this.createStationFrame('survey-face', surveyAccent, {width: 2.28, height: 1.24});
+    this.surveyFaceHalo = this.createGazeHalo('survey-face-halo', surveyAccent, '0.78 -0.34 0.08', 0.18);
+    this.surveyFacePlane._gazeHalo = this.surveyFaceHalo;
+    this.surveyFacePlane.dataset.accent = surveyAccent;
+    this.surveyFacePlane.dataset.swipeSurface = 'true';
+    this.surveyButton = this.surveyFacePlane;
+    this.surveyFaceRoot.append(surveyFrame, this.surveyFacePlane, this.surveyFaceHalo);
+    this.addPanelSwipeHandles(this.surveyFaceRoot, surveyAccent, 'survey');
+    this.domainSelectRoot.appendChild(this.surveyFaceRoot);
+
+    this.bindGazeSelectButton(this.surveyButton, () => this.withRuntimeGuard('설문 열기', () => this.openPoint('survey')), {
+      idle: () => this.utilityStationTexture('설문조사', '학습 후 생각을 선택합니다.', 'SURVEY', this.theme.palette?.mint || '#14b8a6', false),
+      focused: () => this.utilityStationTexture('설문조사', '조준됨 · 클릭하면 설문이 열립니다.', 'SURVEY', this.theme.palette?.mint || '#14b8a6', true)
+    });
+    this.bindGazeSelectButton(this.frameworkEntryPlane, () => this.withRuntimeGuard('설명 보기', () => this.openPoint('framework')), {
+      idle: () => this.utilityStationTexture('문제 풀이 결과 보기', '4개 영역과 세부 역량을 한 화면에서 확인합니다.', 'OECD', frameworkAccent, false),
+      focused: () => this.utilityStationTexture('문제 풀이 결과 보기', '조준됨 · 클릭하면 설명 패널이 열립니다.', 'OECD', frameworkAccent, true)
+    });
+    this.bindPanelSwipeSurface(this.surveyFacePlane);
+    this.bindPanelSwipeSurface(this.frameworkEntryPlane);
+    this.createFrameworkDetailUi();
+    this.createClassroomHotspotUi();
+  }
+
+  createClassroomHotspotUi() {
+    this.classroomHotspotRoot = document.createElement('a-entity');
+    this.classroomHotspotRoot.id = 'classroom-hotspot-ui';
+    this.classroomHotspotRoot.setAttribute('visible', 'false');
+
+    this.data.domains.forEach((domain) => {
+      const face = STUDIO_FACES[domain.id] || STUDIO_FACES.engaging;
+      const accent = this.theme.domains?.[domain.id]?.accent || this.getFaceAccent(domain.id);
+      const label = domain.title || domain.titleKo || domain.id;
+      this.classroomHotspotRoot.appendChild(this.createClassroomHotspot({
+        id: `classroom-hotspot-${domain.id}`,
+        panelId: domain.id,
+        label,
+        title: domain.titleKo || domain.title,
+        accent,
+        position: face.position,
+        rotation: face.rotation,
+        action: () => this.openDomain(domain.id, {focus: false})
+      }));
+    });
+
+    const palette = this.theme.palette || {};
+    const utilityHotspots = [
+      {
+        id: 'classroom-hotspot-report',
+        label: 'Report',
+        title: '결과 리포트',
+        accent: palette.cyan || '#38bdf8',
+        face: STUDIO_FACES.progress,
+        action: () => this.showReport()
+      },
+      {
+        id: 'classroom-hotspot-framework',
+        label: '결과 보기',
+        title: '문제 풀이 결과 보기',
+        accent: palette.framework || '#ec4899',
+        face: STUDIO_FACES.framework,
+        action: () => this.showFrameworkInfo()
+      },
+      {
+        id: 'classroom-hotspot-survey',
+        label: 'Survey',
+        title: '설문조사',
+        accent: palette.mint || '#14b8a6',
+        face: STUDIO_FACES.survey,
+        action: () => this.showSurvey()
+      }
+    ];
+
+    utilityHotspots.forEach((hotspot) => {
+      this.classroomHotspotRoot.appendChild(this.createClassroomHotspot({
+        id: hotspot.id,
+        panelId: hotspot.id.replace('classroom-hotspot-', ''),
+        label: hotspot.label,
+        title: hotspot.title,
+        accent: hotspot.accent,
+        position: hotspot.face.position,
+        rotation: hotspot.face.rotation,
+        action: hotspot.action
+      }));
+    });
+
+    this.classroomRoot.appendChild(this.classroomHotspotRoot);
+  }
+
+  createClassroomHotspot({id, panelId, label, title, accent, position, rotation, action}) {
+    const root = document.createElement('a-entity');
+    root.id = id;
+    root.setAttribute('position', position);
+    root.setAttribute('rotation', rotation);
+    root.dataset.panelId = panelId || id;
+
+    const marker = document.createElement('a-ring');
+    marker.id = `${id}-ring`;
+    marker.setAttribute('radius-inner', '0.18');
+    marker.setAttribute('radius-outer', '0.205');
+    marker.setAttribute('segments-theta', '96');
+    marker.setAttribute('position', '0 0.03 0.06');
+    marker.setAttribute('material', `color: ${accent}; shader: flat; transparent: true; opacity: 0.82; side: double`);
+    marker.setAttribute('animation__pulse', 'property: scale; from: 0.94 0.94 1; to: 1.08 1.08 1; dur: 1300; easing: easeInOutSine; loop: true; dir: alternate');
+
+    const button = createPlane({
+      id: `${id}-button`,
+      width: 0.92,
+      height: 0.34,
+      className: 'interactive classroom-hotspot',
+      position: '0 -0.30 0.08'
+    });
+    button.dataset.accent = accent;
+    button.dataset.panelId = panelId || id;
+    button.dataset.label = label;
+    button.dataset.title = title;
+    applyTexture(button, this.hotspotTexture(label, title, accent, false, panelId));
+    this.bindGazeSelectButton(button, () => this.withRuntimeGuard(`${title} 열기`, () => {
+      if (action && !this.isKnownPoint(panelId)) {
+        action();
+        return;
+      }
+      this.openPoint(panelId);
+    }), {
+      idle: () => this.hotspotTexture(label, title, accent, false, panelId),
+      focused: () => this.hotspotTexture(label, `${title} 열기`, accent, true, panelId)
+    });
+
+    root.append(marker, button);
+    root._marker = marker;
+    root._button = button;
+    this.classroomHotspots.push(button);
+    if (panelId) this.classroomHotspotRoots.set(panelId, root);
+    return root;
+  }
+
+  hotspotTexture(label, title, accent, focused = false, panelId = '') {
+    const state = this.getMissionVisualState(panelId);
+    const prefix = state.complete ? '완료' : state.locked ? '잠김' : focused ? '선택' : '열림';
+    const subtitle = state.locked
+      ? '이전 미션 완료 후 열립니다.'
+      : state.complete
+        ? `${title} · 완료됨`
+        : focused
+          ? `${title} · 클릭하면 열립니다.`
+          : title;
+    return {
+      variant: 'button',
+      width: 680,
+      height: 210,
+      background: focused && !state.locked ? '#f8fbff' : state.locked ? '#050b14' : '#071827',
+      border: accent,
+      accent,
+      title: `${prefix} · ${label}`,
+      subtitle,
+      textColor: focused && !state.locked ? '#102235' : state.locked ? '#9aa8b8' : '#f8fbff',
+      align: 'center',
+      glass: false,
+      titleSize: focused ? 31 : 30,
+      titleMaxLines: 1,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  showStart() {
+    this.appMode = 'start';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.focusSection('start');
+    this.startPanel.show();
+    this.setGroupVisible(this.startPanel.el, true);
+    this.updateHomeButtonVisibility();
+  }
+
+  returnToStart() {
+    this.activeDomain = null;
+    this.pendingPointAfterIntro = null;
+    this.introVideoPanel?.pauseVideo?.();
+    this.showStart();
+  }
+
+  updateHomeButtonVisibility() {
+    if (!this.homeButton) return;
+    const shouldShow = this.appMode !== 'start';
+    this.setGroupVisible(this.homeButton, shouldShow);
+  }
+
+  isIntroVideoEnabled() {
+    return this.theme?.introVideo?.enabled !== false;
+  }
+
+  shouldRequireIntroVideo() {
+    const config = this.theme?.introVideo || {};
+    return this.isIntroVideoEnabled() &&
+      config.requiredBeforeQuiz !== false &&
+      !this.routeOptions.skipVideo &&
+      this.introVideoConfirmed !== true;
+  }
+
+  showIntroVideo() {
+    this.appMode = 'introVideo';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.focusSection('start');
+    this.setGroupVisible(this.classroomRoot, true);
+    this.setGroupVisible(this.introVideoPanel?.el, true);
+    this.introVideoPanel?.show();
+    this.showNotice('영상을 확인한 뒤 미션 활동을 시작할 수 있습니다.');
+    this.debugLog('mode-intro-video', {
+      pendingPointAfterIntro: this.pendingPointAfterIntro,
+      hasVideoUrl: Boolean(this.theme?.introVideo?.url)
+    });
+    this.updateHomeButtonVisibility();
+  }
+
+  confirmIntroVideo() {
+    this.introVideoConfirmed = true;
+    this.introVideoPanel?.hide();
+
+    const pendingPoint = this.pendingPointAfterIntro;
+    this.pendingPointAfterIntro = null;
+    this.showNotice('확인이 완료되었습니다. 미션을 시작합니다.');
+
+    if (pendingPoint && this.isKnownPoint(pendingPoint)) {
+      this.openPoint(pendingPoint);
+      return;
+    }
+
+    if (this.isClassroomModeActive() && !this.savedClassroomAnchor) {
+      this.showClassroomPlacement();
+      return;
+    }
+
+    this.showDomainSelect();
+  }
+
+  showClassroomPlacement() {
+    this.appMode = 'placement';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.setGroupVisible(this.classroomRoot, false);
+    this.setGroupVisible(this.placementRoot, true);
+    this.placementRoot?.setAttribute('scale', '0.96 0.96 0.96');
+    this.placementRoot?.setAttribute('animation__open', 'property: scale; to: 1 1 1; dur: 180; easing: easeOutCubic');
+    this.debugLog('mode-classroom-placement');
+    this.updateHomeButtonVisibility();
+  }
+
+  showDomainSelect() {
+    if (this.shouldRequireIntroVideo()) {
+      this.showIntroVideo();
+      return;
+    }
+
+    this.appMode = 'domainSelect';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.updateDomainSelectUi();
+    this.focusSection('domainSelect');
+    this.setGroupVisible(this.classroomRoot, true);
+    if (this.isClassroomModeActive()) {
+      if (!this.hasCompleteClassroomLayout()) {
+        this.showClassroomPanelPlacement();
+        return;
+      }
+      this.applyClassroomLayout();
+      this.updateClassroomHotspotStates();
+      this.setClassroomHotspotsInteractive(true);
+      this.setGroupVisible(this.domainSelectRoot, false);
+      this.setGroupVisible(this.classroomHotspotRoot, true);
+      this.classroomHotspotRoot?.setAttribute('scale', '0.96 0.96 0.96');
+      this.classroomHotspotRoot?.setAttribute('animation__open', 'property: scale; to: 1 1 1; dur: 180; easing: easeOutCubic');
+      this.debugLog('mode-domain-select-hotspots');
+      this.updateHomeButtonVisibility();
+      return;
+    }
+
+    this.setGroupVisible(this.classroomHotspotRoot, false);
+    this.setGroupVisible(this.domainSelectRoot, true);
+    this.domainFocusIndex = 0;
+    this.applyDomainRingRotation(false);
+    this.domainSelectRoot.setAttribute('scale', '0.97 0.97 0.97');
+    this.domainSelectRoot.setAttribute('animation__open', 'property: scale; to: 1 1 1; dur: 160; easing: easeOutCubic');
+    this.debugLog('mode-domain-select');
+    this.updateHomeButtonVisibility();
+  }
+
+  rotateDomainRing(direction = 1) {
+    if (this.appMode !== 'domainSelect' || !this.domainSelectRoot) return;
+    const total = STUDIO_FACE_ORDER.length;
+    this.domainFocusIndex = (this.domainFocusIndex + direction + total) % total;
+    this.applyDomainRingRotation(true);
+  }
+
+  applyDomainRingRotation(animate = true) {
+    if (!this.cameraRig) return;
+    if (this.isClassroomModeActive()) return;
+    const faceId = STUDIO_FACE_ORDER[this.domainFocusIndex] || 'progress';
+    const face = STUDIO_FACES[faceId] || STUDIO_FACES.progress;
+    const target = `0 ${-face.angle} 0`;
+    this.domainSelectRoot.dataset.focusFace = faceId;
+    const lookControls = this.camera?.components?.['look-controls'];
+    if (lookControls?.pitchObject) lookControls.pitchObject.rotation.x = 0;
+    if (lookControls?.yawObject) lookControls.yawObject.rotation.y = 0;
+    this.camera?.setAttribute('rotation', '0 0 0');
+    this.cameraRig.removeAttribute('animation__ring_scroll');
+    if (!animate) {
+      this.cameraRig.setAttribute('rotation', target);
+      return;
+    }
+    this.cameraRig.setAttribute('animation__ring_scroll', `property: rotation; to: ${target}; dur: 280; easing: easeInOutQuad`);
+  }
+
+  startIntroTransition() {
+    const transition = document.querySelector('#scene-transition');
+    transition?.classList.add('is-active');
+
+    window.setTimeout(() => {
+      if (this.shouldRequireIntroVideo()) {
+        this.showIntroVideo();
+      } else
+      if (this.isClassroomModeActive() && !this.savedClassroomAnchor) {
+        this.showClassroomPlacement();
+      } else {
+        // [방탈출 직행 마법] 복잡한 허공 메뉴판을 거치지 않고 곧바로 1번 문제 방으로 순간이동 시킵니다!
+        this.setGroupVisible(this.classroomRoot, true);
+        this.openDomain('engaging');
+      }
+      window.requestAnimationFrame(() => transition?.classList.remove('is-active'));
+    }, 320);
+  }
+
+  updateDomainSelectUi() {
+    const palette = this.theme.palette || {};
+    const overall = getOverallStats(this.data, this.progress);
+
+    this.data.domains.forEach((domain) => {
+      const stats = getDomainStats(domain, this.progress);
+      const domainTheme = this.theme.domains?.[domain.id] || {};
+      const accent = domainTheme.accent || '#2563eb';
+      const card = this.domainCards.get(domain.id);
+      const button = this.domainCardButtons.get(domain.id);
+      const status = stats.complete ? '완료 · 다시 풀기' : stats.answered > 0 ? '이어 풀기' : '시작';
+
+      card.dataset.stationStatus = status;
+      applyTexture(card, this.domainStationTexture(domain, accent, false));
+      button.dataset.accent = accent;
+      button.dataset.idleTitle = status;
+      button.dataset.gazeReady = 'false';
+    });
+
+    const surveyAnswered = this.surveyData?.questions?.filter((question) => (
+      this.surveyResponses.answers?.[question.id] !== undefined
+    )).length || 0;
+    const surveyTotal = this.surveyData?.questions?.length || 0;
+
+    this.updateProgressRing();
+    this.updateFrameworkEntryUi();
+
+    this.updateInlineReportDashboard(overall);
+
+    applyTexture(this.surveyFacePlane, this.utilityStationTexture(
+      '설문조사',
+      `${this.surveyData?.description || '학습 후 생각을 선택합니다.'}\n응답 ${surveyAnswered}/${surveyTotal}`,
+      'SURVEY',
+      palette.mint || '#14b8a6',
+      false
+    ));
+
+    this.surveyButton.dataset.gazeReady = 'false';
+    if (this.frameworkEntryPlane) this.frameworkEntryPlane.dataset.gazeReady = 'false';
+  }
+
+  updateInlineReportDashboard(overallStats) {
+    if (!this.progressFacePlane) return;
+    const palette = this.theme.palette || {};
+    const tokens = this.theme.ui || {};
+    const domainStats = Object.fromEntries(this.data.domains.map((domain) => [domain.id, getDomainStats(domain, this.progress)]));
+    const rankedDomains = this.data.domains
+      .map((domain) => ({domain, stats: domainStats[domain.id]}))
+      .sort((a, b) => b.stats.accuracy - a.stats.accuracy);
+    const strength = rankedDomains[0]?.domain.titleKo || '-';
+    const growth = rankedDomains[rankedDomains.length - 1]?.domain.titleKo || '-';
+
+    applyTexture(this.progressFacePlane, {
+      variant: 'reportGrid',
+      width: 1280,
+      height: 720,
+      accent: palette.cyan || '#38bdf8',
+      subtitle: 'REPORT',
+      title: '결과 리포트',
+      overall: overallStats,
+      domains: this.data.domains.map((domain) => {
+        const stats = domainStats[domain.id];
+        const domainTheme = this.theme.domains?.[domain.id] || {};
+        return {
+          label: domainTheme.shortLabel || domain.title,
+          title: domain.titleKo,
+          answered: stats.answered,
+          correct: stats.correct,
+          total: stats.total,
+          accuracy: stats.accuracy,
+          accent: domainTheme.accent || this.getFaceAccent(domain.id)
+        };
+      }),
+      footer: `강점 ${strength} · 보완 ${growth}`,
+      tokens
+    });
+  }
+
+  domainStationTexture(domain, accent, focused = false) {
+    const stats = getDomainStats(domain, this.progress);
+    const status = stats.complete ? '완료 · 다시 풀기' : stats.answered > 0 ? '이어 풀기' : '시작';
+    return {
+      variant: 'station',
+      width: 1280,
+      height: 720,
+      accent,
+      icon: domain.title,
+      subtitle: '',
+      title: domain.titleKo,
+      body: focused ? domain.description : '시선을 맞춘 뒤 클릭해 시작합니다.',
+      footer: focused ? '조준됨 · 클릭' : `${status} · ${stats.answered}/${stats.total}`,
+      focused,
+      progress: null,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  progressStationTexture(focused = false) {
+    const palette = this.theme.palette || {};
+    const overall = getOverallStats(this.data, this.progress);
+    const domainLine = this.data.domains.map((domain) => {
+      const stats = getDomainStats(domain, this.progress);
+      const shortTitle = String(domain.titleKo || domain.title || '').replace(/^AI[와로 ]*/, '').replace(/하기$/, '');
+      return `${shortTitle} ${stats.answered}/${stats.total}`;
+    }).join(' · ');
+    return {
+      variant: 'station',
+      width: 1280,
+      height: 720,
+      accent: palette.cyan || '#38bdf8',
+      icon: 'REPORT',
+      subtitle: '',
+      title: '진행률 / 리포트',
+      body: `전체 ${overall.answered}/${overall.total} 완료 · 정답 ${overall.correct}개 · 정답률 ${overall.accuracy}%\n${domainLine}`,
+      footer: focused ? '조준됨 · 상세 리포트 열기' : '상세 리포트 보기',
+      focused,
+      progress: null,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  utilityStationTexture(title, body, icon, accent, focused = false, progress = null, textureOptions = {}) {
+    return {
+      variant: 'station',
+      width: textureOptions.width || 1280,
+      height: textureOptions.height || 720,
+      accent,
+      icon,
+      subtitle: '',
+      title,
+      body,
+      footer: focused ? '조준됨 · 클릭' : '시선으로 선택',
+      focused,
+      progress,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  updateFrameworkEntryUi() {
+    if (!this.frameworkEntryPlane) return;
+    const accent = this.theme.palette?.framework || '#ec4899';
+    applyTexture(this.frameworkEntryPlane, this.utilityStationTexture(
+      '문제 풀이 결과 보기',
+      '4개 영역과 세부 역량을 한 화면에서 확인합니다.',
+      'OECD',
+      accent,
+      false,
+      null,
+      {width: 1280, height: 720}
+    ));
+    this.frameworkEntryPlane.dataset.gazeReady = 'false';
+  }
+
+  createFrameworkDetailUi() {
+    this.frameworkDetailRoot = document.createElement('a-entity');
+    this.frameworkDetailRoot.id = 'framework-detail-ui';
+    this.frameworkDetailRoot.setAttribute('position', '0 2.34 -3.35');
+    this.frameworkDetailRoot.setAttribute('rotation', '0 0 0');
+    this.frameworkDetailRoot.setAttribute('visible', 'false');
+
+    this.frameworkDetailTrack = document.createElement('a-entity');
+    this.frameworkDetailTrack.id = 'framework-detail-track';
+    this.frameworkDetailTrack.setAttribute('position', '0 0 0');
+
+    this.frameworkDetailPlanes = this.data.domains.map((domain, index) => {
+      const plane = createPlane({
+        id: `framework-detail-${domain.id}`,
+        width: 2.24,
+        height: 1.62,
+        position: `${(index * FRAMEWORK_SLIDE_SLOT).toFixed(3)} 0.12 0.06`,
+        rotation: '0 0 0'
+      });
+      this.frameworkDetailTrack.appendChild(plane);
+      return plane;
+    });
+    this.frameworkDetailRoot.appendChild(this.frameworkDetailTrack);
+
+    this.frameworkBackButton = createPlane({
+      id: 'framework-detail-back',
+      width: 0.70,
+      height: 0.22,
+      className: 'interactive framework-back',
+      position: '0 -1.00 0.22'
+    });
+    bindInteractiveAction(this.frameworkBackButton, () => this.withRuntimeGuard('영역 선택으로 돌아가기', () => this.showDomainSelect()));
+    bindHoverEffect(this.frameworkBackButton, {activeScale: '1.045 1.045 1'});
+    this.frameworkDetailRoot.appendChild(this.frameworkBackButton);
+    this.classroomRoot.appendChild(this.frameworkDetailRoot);
+  }
+
+  renderFrameworkDetailUi() {
+    if (!this.frameworkDetailRoot || !this.frameworkDetailPlanes?.length) return;
+    this.data.domains.forEach((domain, index) => {
+      const plane = this.frameworkDetailPlanes[index];
+      if (!plane) return;
+      plane.setAttribute('material', {
+        shader: 'flat',
+        src: this.createFrameworkDomainTexture(domain),
+        transparent: true,
+        side: 'double'
+      });
+    });
+    applyTexture(this.frameworkBackButton, {
+      variant: 'button',
+      width: 560,
+      height: 170,
+      background: '#111827',
+      border: '#7dd3fc',
+      accent: '#7dd3fc',
+      title: '영역 선택으로',
+      textColor: '#f8fbff',
+      titleSize: 28,
+      tokens: this.theme.ui || {}
+    });
+  }
+
+  updateFrameworkDetailLayout(animate = true) {
+    if (!this.frameworkDetailTrack || !this.frameworkDetailPlanes?.length) return;
+    const focusIndex = Math.max(0, Math.min(this.frameworkDetailPlanes.length - 1, this.frameworkDetailFocusIndex || 0));
+    const targetX = -(FRAMEWORK_SLIDE_SLOT * focusIndex);
+    this.frameworkDetailRoot.dataset.focusIndex = String(focusIndex);
+    this.frameworkDetailTrack.dataset.focusIndex = String(focusIndex);
+
+    this.frameworkDetailTrack.removeAttribute('animation__framework_slide');
+    if (animate) {
+      this.frameworkDetailTrack.setAttribute(
+        'animation__framework_slide',
+        `property: position; to: ${targetX.toFixed(3)} 0 0; dur: 260; easing: easeInOutQuad`
+      );
+    } else {
+      this.frameworkDetailTrack.setAttribute('position', `${targetX.toFixed(3)} 0 0`);
+    }
+
+    this.frameworkDetailPlanes.forEach((plane, index) => {
+      if (!plane) return;
+      const distance = index - focusIndex;
+      const absDistance = Math.abs(distance);
+      const tilt = Math.max(-16, Math.min(16, -distance * 10));
+      const scale = absDistance === 0 ? '1 1 1' : absDistance === 1 ? '0.93 0.93 1' : '0.88 0.88 1';
+      plane.setAttribute('rotation', `0 ${tilt.toFixed(1)} 0`);
+      plane.setAttribute('scale', scale);
+      plane.dataset.focused = absDistance === 0 ? 'true' : 'false';
+    });
+  }
+
+  rotateFrameworkDetail(direction = 1) {
+    if (this.appMode !== 'framework' || !this.frameworkDetailPlanes?.length) return;
+    const total = this.frameworkDetailPlanes.length;
+    this.frameworkDetailFocusIndex = (this.frameworkDetailFocusIndex + direction + total) % total;
+    this.updateFrameworkDetailLayout(true);
+    this.debugLog('framework-carousel', {
+      direction,
+      focusIndex: this.frameworkDetailFocusIndex,
+      activeDomain: this.data.domains[this.frameworkDetailFocusIndex]?.id || null
+    });
+  }
+
+  handleFrameworkCarouselAxis(x = 0) {
+    if (this.appMode !== 'framework') return;
+    const direction = x > FRAMEWORK_SLIDE_THRESHOLD ? 1 : x < -FRAMEWORK_SLIDE_THRESHOLD ? -1 : 0;
+    if (!direction) {
+      this.frameworkCarouselStickDirection = 0;
+      return;
+    }
+    if (this.frameworkCarouselStickDirection === direction) return;
+    const now = Date.now();
+    if (now - this.lastFrameworkCarouselAt < FRAMEWORK_SLIDE_COOLDOWN_MS) return;
+    this.frameworkCarouselStickDirection = direction;
+    this.lastFrameworkCarouselAt = now;
+    this.rotateFrameworkDetail(direction);
+  }
+
+  getControllerAxis(event) {
+    const detail = event?.detail || {};
+    if (Array.isArray(detail.axis)) {
+      return {
+        x: Number(detail.axis[0] || 0),
+        y: Number(detail.axis[1] || 0)
+      };
+    }
+    if (typeof detail.x === 'number' || typeof detail.y === 'number') {
+      return {
+        x: Number(detail.x || 0),
+        y: Number(detail.y || 0)
+      };
+    }
+    if (Array.isArray(detail.axes)) {
+      return {
+        x: Number(detail.axes[0] || 0),
+        y: Number(detail.axes[1] || 0)
+      };
+    }
+    return null;
+  }
+
+  bindFrameworkCarouselControls() {
+    const hands = [this.leftHand, this.rightHand].filter(Boolean);
+    const handleAxis = (event) => {
+      if (this.appMode !== 'framework') return;
+      const axis = this.getControllerAxis(event);
+      if (!axis) return;
+      this.handleFrameworkCarouselAxis(axis.x);
+    };
+
+    hands.forEach((hand) => {
+      ['thumbstickmoved', 'axismove'].forEach((eventName) => {
+        hand.addEventListener(eventName, handleAxis);
+      });
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (this.appMode !== 'framework') return;
+      const key = String(event.key || '').toLowerCase();
+      if (key === 'arrowleft' || key === 'arrowright') {
+        event.preventDefault();
+        this.rotateFrameworkDetail(key === 'arrowright' ? 1 : -1);
+      }
+    });
+
+    window.addEventListener('wheel', (event) => {
+      if (this.appMode !== 'framework') return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (Math.abs(delta) < 18) return;
+      const now = Date.now();
+      if (now - this.lastFrameworkCarouselAt < 430) return;
+      this.lastFrameworkCarouselAt = now;
+      this.rotateFrameworkDetail(delta > 0 ? 1 : -1);
+      event.preventDefault();
+    }, {passive: false});
+  }
+
+  showFrameworkInfo() {
+    this.appMode = 'framework';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.focusSection('framework');
+    if (!this.applyClassroomPanelPose(this.frameworkDetailRoot, 'framework')) {
+      this.frameworkDetailRoot?.setAttribute('position', '0 2.34 -3.35');
+      this.frameworkDetailRoot?.setAttribute('rotation', '0 0 0');
+    }
+    this.frameworkDetailFocusIndex = 0;
+    this.renderFrameworkDetailUi();
+    this.updateFrameworkDetailLayout(false);
+    this.setGroupVisible(this.frameworkDetailRoot, true);
+    this.frameworkDetailRoot.setAttribute('scale', '0.96 0.96 0.96');
+    this.frameworkDetailRoot.setAttribute('animation__open', 'property: scale; to: 1 1 1; dur: 180; easing: easeOutCubic');
+    this.markMissionComplete('framework');
+    this.debugLog('mode-framework');
+  }
+
+  createFrameworkDomainTexture(domain) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1440;
+    canvas.height = 1050;
+    const ctx = canvas.getContext('2d');
+    const palette = this.theme.palette || {};
+    const domainTheme = this.theme.domains?.[domain.id] || {};
+    const accent = domainTheme.accent || palette.sky || '#7dd3fc';
+    const font = '"Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+
+    const round = (x, y, width, height, radius) => {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + width, y, x + width, y + height, r);
+      ctx.arcTo(x + width, y + height, x, y + height, r);
+      ctx.arcTo(x, y + height, x, y, r);
+      ctx.arcTo(x, y, x + width, y, r);
+      ctx.closePath();
+    };
+    const wrapText = (text, maxWidth) => {
+      const words = String(text || '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+      const lines = [];
+      let line = '';
+      words.forEach((word) => {
+        const testLine = line ? `${line} ${word}` : word;
+        if (ctx.measureText(testLine).width <= maxWidth) {
+          line = testLine;
+          return;
+        }
+        if (line) lines.push(line);
+        if (ctx.measureText(word).width <= maxWidth) {
+          line = word;
+          return;
+        }
+        let chunk = '';
+        [...word].forEach((char) => {
+          const testChunk = `${chunk}${char}`;
+          if (ctx.measureText(testChunk).width > maxWidth && chunk) {
+            lines.push(chunk);
+            chunk = char;
+          } else {
+            chunk = testChunk;
+          }
+        });
+        line = chunk;
+      });
+      if (line) lines.push(line);
+      return lines;
+    };
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(3, 8, 17, 0.95)';
+    round(22, 22, canvas.width - 44, canvas.height - 44, 48);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(248, 251, 255, 0.58)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 5;
+    round(44, 44, canvas.width - 88, canvas.height - 88, 34);
+    ctx.stroke();
+
+    ctx.fillStyle = accent;
+    round(76, 78, 10, 96, 5);
+    ctx.fill();
+    ctx.fillStyle = '#f8fbff';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.font = `860 58px ${font}`;
+    ctx.fillText(domain.titleKo, 112, 78);
+    ctx.fillStyle = 'rgba(226, 238, 250, 0.78)';
+    ctx.font = `700 30px ${font}`;
+    ctx.fillText(`${domain.title} · 미션 문항 수 ${domain.questions.length}개`, 112, 140);
+
+    const items = domain.questions.map((question) => question.competenceKo || question.competence || question.question);
+    const itemWidth = canvas.width - 220;
+    const itemFontSize = domain.questions.length > 6 ? 27 : 29;
+    const lineHeight = itemFontSize + 10;
+    let y = 212;
+    ctx.font = `660 ${itemFontSize}px ${font}`;
+
+    items.forEach((item, index) => {
+      const lines = wrapText(item, itemWidth - 84);
+      const rowHeight = Math.max(62, lines.length * lineHeight + 24);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.055)';
+      round(76, y, itemWidth, rowHeight, 18);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
+      round(96, y + 14, 46, 34, 17);
+      ctx.fill();
+      ctx.fillStyle = accent;
+      ctx.font = `820 19px ${font}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(String(index + 1), 119, y + 22);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(242, 248, 255, 0.86)';
+      ctx.font = `660 ${itemFontSize}px ${font}`;
+      lines.forEach((line, lineIndex) => {
+        ctx.fillText(line, 172, y + 15 + lineIndex * lineHeight);
+      });
+      y += rowHeight + 14;
+    });
+
+    return canvas.toDataURL('image/png');
+  }
+
+  createStationFrame(idPrefix, accent, options = {}) {
+    const width = options.width || 1.68;
+    const height = options.height || 1.06;
+    const frame = document.createElement('a-entity');
+    frame.id = `${idPrefix}-frame`;
+
+    const backplate = createPlane({
+      id: `${idPrefix}-backplate`,
+      width,
+      height,
+      position: '0 0 -0.012'
+    });
+    backplate.setAttribute('material', `color: ${accent}; shader: flat; transparent: true; opacity: 0.13; side: double`);
+
+    frame.append(backplate);
+    return frame;
+  }
+
+  addPanelSwipeHandles(parent, accent, idPrefix, options = {}) {
+    if (!parent) return;
+    return;
+  }
+
+  bindPanelSwipeHandle(handle, hitArea) {
+    const beginFromPointer = (event) => {
+      if (this.appMode !== 'domainSelect') return;
+      if (this.isControllerCursorEvent(event)) return;
+      const pointerX = this.getPointerX(event);
+      this.beginPanelSwipe({
+        source: 'pointer',
+        handle,
+        fallbackDirection: Number(hitArea.dataset.fallbackDirection || handle.dataset.fallbackDirection || 1),
+        pointerX
+      });
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+    };
+
+    ['mousedown', 'touchstart'].forEach((eventName) => {
+      hitArea.addEventListener(eventName, beginFromPointer);
+      handle.addEventListener(eventName, beginFromPointer);
+    });
+
+    const clickFallback = (event) => {
+      if (this.appMode !== 'domainSelect') return;
+      if (Date.now() - Number(handle.dataset.lastSwipeEndedAt || 0) < 220) return;
+      this.completePanelSwipe(Number(hitArea.dataset.fallbackDirection || handle.dataset.fallbackDirection || 1), 'handle-click');
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+    };
+    hitArea.addEventListener('click', clickFallback);
+    handle.addEventListener('click', clickFallback);
+
+    const setFocused = (focused) => {
+      const grip = handle._swipeGrip;
+      if (!grip) return;
+      grip.setAttribute(
+        'material',
+        `color: ${handle.dataset.accent || '#7dd3fc'}; shader: flat; transparent: true; opacity: ${focused ? 0.96 : 0.52}; side: double`
+      );
+      handle.setAttribute('animation__swipe_focus', `property: scale; to: ${focused ? '1.08 1.08 1' : '1 1 1'}; dur: 120; easing: easeOutQuad`);
+    };
+
+    hitArea.addEventListener('mouseenter', () => setFocused(true));
+    hitArea.addEventListener('mouseleave', () => setFocused(false));
+  }
+
+  bindPanelSwipeSurface(surface) {
+    if (!surface || surface.dataset.swipeSurfaceBound === 'true') return;
+    surface.dataset.swipeSurfaceBound = 'true';
+    surface.addEventListener('mousedown', (event) => {
+      if (this.appMode !== 'domainSelect') return;
+      if (this.isControllerCursorEvent(event)) return;
+      this.beginPanelSwipe({
+        source: 'pointer',
+        handle: surface,
+        fallbackDirection: 0,
+        pointerX: this.getPointerX(event),
+        requireThreshold: true,
+        suppressTarget: surface
+      });
+    });
+  }
+
+  domainButtonTexture(title, accent, focused = false) {
+    return {
+      variant: 'button',
+      width: 380,
+      height: 128,
+      background: focused ? '#ffffff' : accent,
+      border: accent,
+      accent,
+      title,
+      textColor: focused ? accent : '#ffffff',
+      align: 'center',
+      glass: focused,
+      titleSize: focused ? 21 : 22,
+      titleMaxLines: 1,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  navButtonTexture(title, background, textColor, focused = false) {
+    const palette = this.theme.palette || {};
+    return {
+      variant: 'button',
+      width: 560,
+      height: 150,
+      background: focused ? '#ffffff' : background,
+      border: palette.line || '#c9d8e6',
+      accent: palette.sky || '#62c6f2',
+      title,
+      textColor: focused ? background : textColor,
+      align: 'center',
+      glass: true,
+      titleSize: focused ? 23 : 25,
+      tokens: this.theme.ui || {}
+    };
+  }
+
+  bindGazeSelectButton(button, action, textures) {
+    button.dataset.gazeReady = 'false';
+    bindInteractiveAction(button, (event) => {
+      this.pulseGazeHalo(button);
+      action(event);
+    }, {
+      events: ['click', 'touchstart'],
+      shouldHandle: (event) => (
+        Date.now() > Number(button.dataset.suppressClickUntil || 0) &&
+        (button.dataset.gazeReady === 'true' || event.type === 'touchstart')
+      )
+    });
+    bindHoverEffect(button, {
+      activeScale: '1.045 1.045 1',
+      onEnter: () => {
+        button.dataset.gazeReady = 'true';
+        this.showGazeHalo(button, true);
+        applyTexture(button, textures.focused());
+      },
+      onLeave: () => {
+        button.dataset.gazeReady = 'false';
+        this.showGazeHalo(button, false);
+        applyTexture(button, textures.idle());
+      }
+    });
+  }
+
+  createGazeHalo(id, accent, position = '0 0 0.08', radius = 0.14) {
+    const halo = document.createElement('a-ring');
+    halo.id = id;
+    halo.setAttribute('radius-inner', String(radius));
+    halo.setAttribute('radius-outer', String(radius + 0.014));
+    halo.setAttribute('segments-theta', '80');
+    halo.setAttribute('position', position);
+    halo.setAttribute('material', `color: ${accent}; shader: flat; transparent: true; opacity: 0.0; side: double`);
+    halo.setAttribute('visible', 'false');
+    return halo;
+  }
+
+  showGazeHalo(entity, visible) {
+    const halo = entity?._gazeHalo;
+    if (!halo) return;
+    halo.setAttribute('visible', 'false');
+    halo.removeAttribute('animation__turn');
+    halo.removeAttribute('animation__aim');
+    halo.setAttribute('scale', '1 1 1');
+    halo.setAttribute('rotation', '0 0 0');
+  }
+
+  pulseGazeHalo(entity) {
+    const halo = entity?._gazeHalo;
+    if (!halo) return;
+    halo.setAttribute('visible', 'false');
+    halo.removeAttribute('animation__select');
+  }
+
+  createProgressRing() {
+    this.progressRingRoot = document.createElement('a-entity');
+    this.progressRingRoot.id = 'floor-progress-ring';
+    this.progressMarkers = [];
+
+    const questions = this.data.domains.flatMap((domain) => domain.questions.map((question) => ({domain, question})));
+    const total = Math.max(questions.length, 1);
+    const radius = 2.18;
+
+    const track = document.createElement('a-torus');
+    track.id = 'floor-progress-track';
+    track.setAttribute('radius', String(radius));
+    track.setAttribute('radius-tubular', '0.008');
+    track.setAttribute('segments-radial', '132');
+    track.setAttribute('segments-tubular', '8');
+    track.setAttribute('rotation', '90 0 0');
+    track.setAttribute('position', '0 0.026 0');
+    track.setAttribute('material', 'color: #38bdf8; shader: flat; transparent: true; opacity: 0.24');
+    this.progressRingRoot.appendChild(track);
+
+    const outerTrack = document.createElement('a-torus');
+    outerTrack.id = 'floor-progress-outer-track';
+    outerTrack.setAttribute('radius', String(radius + 0.18));
+    outerTrack.setAttribute('radius-tubular', '0.0035');
+    outerTrack.setAttribute('segments-radial', '132');
+    outerTrack.setAttribute('segments-tubular', '8');
+    outerTrack.setAttribute('rotation', '90 0 0');
+    outerTrack.setAttribute('position', '0 0.024 0');
+    outerTrack.setAttribute('material', 'color: #8b5cf6; shader: flat; transparent: true; opacity: 0.18');
+    this.progressRingRoot.appendChild(outerTrack);
+
+    questions.forEach(({domain, question}, index) => {
+      const angle = (index / total) * Math.PI * 2;
+      const marker = document.createElement('a-cylinder');
+      marker.id = `progress-marker-${question.id}`;
+      marker.dataset.questionId = question.id;
+      marker.dataset.domainId = domain.id;
+      marker.setAttribute('radius', '0.043');
+      marker.setAttribute('height', '0.026');
+      marker.setAttribute('segments-radial', '32');
+      marker.setAttribute('position', `${(Math.sin(angle) * radius).toFixed(3)} 0.036 ${(-Math.cos(angle) * radius).toFixed(3)}`);
+      marker.setAttribute('material', 'color: #172235; emissive: #000000; emissiveIntensity: 0.0; roughness: 0.5; metalness: 0.08');
+      this.progressRingRoot.appendChild(marker);
+      this.progressMarkers.push(marker);
+    });
+
+    this.domainSelectRoot.appendChild(this.progressRingRoot);
+  }
+
+  updateProgressRing() {
+    if (!this.progressMarkers?.length) return;
+    const danger = this.theme.palette?.danger || '#de4d5a';
+    this.progressMarkers.forEach((marker) => {
+      const questionId = marker.dataset.questionId;
+      const domainId = marker.dataset.domainId;
+      const selected = this.progress.answers?.[questionId];
+      const domain = this.findDomain(domainId);
+      const question = domain?.questions?.find((item) => item.id === questionId);
+      const accent = this.getFaceAccent(domainId);
+      const answered = selected !== undefined;
+      const correct = answered && question && selected === question.answerIndex;
+      const color = !answered ? '#172235' : correct ? accent : danger;
+      const emissive = !answered ? '#000000' : color;
+      const intensity = !answered ? 0 : 0.74;
+      marker.setAttribute('material', `color: ${color}; emissive: ${emissive}; emissiveIntensity: ${intensity}; roughness: 0.46; metalness: 0.02`);
+      marker.setAttribute('scale', answered ? '1.32 1 1.32' : '1 1 1');
+    });
+  }
+
+  getFaceAccent(faceId) {
+    const palette = this.theme.palette || {};
+    if (this.theme.domains?.[faceId]?.accent) return this.theme.domains[faceId].accent;
+    const key = STUDIO_FACES[faceId]?.accentKey;
+    return palette[key] || {
+      survey: palette.mint || '#14b8a6',
+      progress: palette.cyan || '#38bdf8',
+      framework: palette.framework || '#ec4899'
+    }[faceId] || palette.sky || '#62c6f2';
+  }
+
+  normalisePointId(pointId) {
+    const id = normaliseQueryValue(pointId);
+    if (['ai-literacy', 'ai_literacy', 'oecd', 'literacy'].includes(id)) return 'framework';
+    if (['result', 'results', 'progress'].includes(id)) return 'report';
+    if (['reflection'].includes(id)) return 'survey';
+    return id;
+  }
+
+  isKnownPoint(pointId) {
+    const id = this.normalisePointId(pointId);
+    return Boolean(this.findDomain(id) || ['framework', 'report', 'survey'].includes(id));
+  }
+
+  getMissionOrder() {
+    const configuredOrder = this.theme?.arMission?.order;
+    const order = Array.isArray(configuredOrder) && configuredOrder.length
+      ? configuredOrder
+      : DEFAULT_MISSION_ORDER;
+    return order.map((id) => this.normalisePointId(id)).filter((id, index, list) => id && list.indexOf(id) === index);
+  }
+
+  isMissionSequential() {
+    return this.theme?.arMission?.enabled !== false && this.theme?.arMission?.sequential === true;
+  }
+
+  isSurveyComplete() {
+    const questions = Array.isArray(this.surveyData?.questions) ? this.surveyData.questions : [];
+    if (!questions.length) return true;
+    return questions.every((question) => this.surveyResponses.answers?.[question.id] !== undefined);
+  }
+
+  isMissionItemComplete(pointId) {
+    const id = this.normalisePointId(pointId);
+    const domain = this.findDomain(id);
+    if (domain) return getDomainStats(domain, this.progress).complete;
+    if (id === 'survey') return this.isSurveyComplete() || this.missionState.completed?.survey === true;
+    return this.missionState.completed?.[id] === true;
+  }
+
+  isMissionItemUnlocked(pointId) {
+    const id = this.normalisePointId(pointId);
+    if (!this.isMissionSequential()) return true;
+    const order = this.getMissionOrder();
+    const index = order.indexOf(id);
+    if (index <= 0) return true;
+    return order.slice(0, index).every((previousId) => this.isMissionItemComplete(previousId));
+  }
+
+  getMissionVisualState(pointId) {
+    const id = this.normalisePointId(pointId);
+    const complete = this.isMissionItemComplete(id);
+    const unlocked = this.isMissionItemUnlocked(id);
+    const order = this.getMissionOrder();
+    const orderIndex = order.indexOf(id);
+    const previousId = orderIndex > 0 ? order[orderIndex - 1] : null;
+    return {
+      id,
+      complete,
+      unlocked,
+      locked: !unlocked,
+      orderIndex,
+      previousId
+    };
+  }
+
+  markMissionComplete(pointId) {
+    const id = this.normalisePointId(pointId);
+    if (!id || this.findDomain(id)) {
+      this.updateClassroomHotspotStates();
+      return;
+    }
+    this.missionState = {
+      ...(this.missionState || {}),
+      completed: {
+        ...(this.missionState?.completed || {}),
+        [id]: true
+      }
+    };
+    writeJson(MISSION_STATE_KEY, this.missionState);
+    this.updateClassroomHotspotStates();
+  }
+
+  openPoint(pointId) {
+    const id = this.normalisePointId(pointId);
+    if (!this.isKnownPoint(id)) return;
+
+    if (this.shouldRequireIntroVideo()) {
+      this.pendingPointAfterIntro = id;
+      this.showIntroVideo();
+      return;
+    }
+
+    if (!this.isMissionItemUnlocked(id)) {
+      const previous = this.getMissionVisualState(id).previousId;
+      const previousTitle = previous ? this.getPointDisplayName(previous) : '이전 미션';
+      if (this.appMode !== 'domainSelect') this.showDomainSelect();
+      this.showNotice(`${previousTitle}을(를) 먼저 완료한 뒤 열 수 있습니다.`);
+      this.updateClassroomHotspotStates();
+      return;
+    }
+
+    const domain = this.findDomain(id);
+    if (domain) {
+      this.openDomain(id, {focus: false});
+      return;
+    }
+    if (id === 'framework') {
+      this.showFrameworkInfo();
+      return;
+    }
+    if (id === 'report') {
+      this.showReport();
+      return;
+    }
+    if (id === 'survey') this.showSurvey();
+  }
+
+  getPointDisplayName(pointId) {
+    const id = this.normalisePointId(pointId);
+    const domain = this.findDomain(id);
+    if (domain) return domain.titleKo || domain.title || id;
+    return {
+      framework: '문제 풀이 결과 보기',
+      report: '결과 리포트',
+      survey: '설문조사'
+    }[id] || id;
+  }
+
+  updateClassroomHotspotStates() {
+    if (!this.classroomHotspotRoots?.size) return;
+    this.classroomHotspotRoots.forEach((root, panelId) => {
+      const marker = root._marker;
+      const button = root._button;
+      const accent = button?.dataset.accent || '#7dd3fc';
+      const state = this.getMissionVisualState(panelId);
+      const markerOpacity = state.locked ? 0.22 : state.complete ? 0.95 : 0.72;
+      marker?.setAttribute(
+        'material',
+        `color: ${accent}; shader: flat; transparent: true; opacity: ${markerOpacity}; side: double`
+      );
+      if (state.locked) {
+        marker?.removeAttribute('animation__pulse');
+      } else {
+        marker?.setAttribute('animation__pulse', 'property: scale; from: 0.94 0.94 1; to: 1.08 1.08 1; dur: 1300; easing: easeInOutSine; loop: true; dir: alternate');
+      }
+      if (button) {
+        applyTexture(button, this.hotspotTexture(
+          button.dataset.label || panelId,
+          button.dataset.title || this.getPointDisplayName(panelId),
+          accent,
+          false,
+          panelId
+        ));
+      }
+    });
+  }
+
+  openDomain(domainId, options = {}) {
+    const domain = this.findDomain(domainId);
+    const panel = this.quizPanels.get(domainId);
+    if (!domain || !panel) return;
+
+    this.appMode = 'quiz';
+    this.activeDomain = domainId;
+    this.quizShouldFocus = options.focus !== false;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    if (this.quizShouldFocus) this.focusSection('quiz', domainId);
+
+    const stats = getDomainStats(domain, this.progress);
+    if (stats.complete) {
+      this.progress = resetDomainProgress(this.progress, domain);
+      this.updateDomainSelectUi();
+    }
+
+    const nextQuestion = getNextUnansweredQuestion(domain, this.progress);
+    if (nextQuestion) {
+      this.showDomainQuestion(domain, nextQuestion);
+      return;
+    }
+
+    this.showDomainComplete(panel, domain);
+  }
+
+  showDomainQuestion(domain, question, animate = true) {
+    const panel = this.quizPanels.get(domain.id);
+    if (!panel) return;
+    this.appMode = 'quiz';
+    this.activeDomain = domain.id;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllQuizPanels();
+    if (this.quizShouldFocus !== false) this.focusSection('quiz', domain.id);
+
+    const domainStats = getDomainStats(domain, this.progress);
+    const questionNumber = Math.max(1, domain.questions.findIndex((item) => item.id === question.id) + 1);
+    const attempts = getAttemptCount(this.progress, question.id);
+    const remaining = Math.max(0, MAX_ATTEMPTS - attempts);
+    const progressText = `${domain.titleKo} ${questionNumber}/${domainStats.total} · 남은 기회 ${remaining}번`;
+    panel.show(question, domain, progressText, this.getQuizTransform(domain.id));
+    panel.setCloseButton('영역 선택');
+    this.setGroupVisible(panel.el, true);
+    if (!animate) panel.el.removeAttribute('animation__open');
+    this.debugLog('show-question', {domainId: domain.id, questionId: question.id});
+    this.updateHomeButtonVisibility();
+  }
+
+  selectChoice(choiceIndex, panel, event = null) {
+    const domain = this.findDomain(panel.domainId);
+    const question = panel.currentQuestion;
+
+    this.debugLog('choice-event', {
+      domainId: panel.domainId,
+      questionId: question?.id || null,
+      choiceIndex,
+      answerIndex: question?.answerIndex ?? null,
+      eventType: event?.type || 'keyboard',
+      panelState: panel.el.dataset.panelState || ''
+    });
+
+    if (!domain || !question || this.progress.answers[question.id] !== undefined || !panel.canSelectChoice(choiceIndex)) {
+      this.debugLog('choice-ignored', {choiceIndex});
+      return;
+    }
+
+    const correct = choiceIndex === question.answerIndex;
+    const attemptsAfterThisChoice = getAttemptCount(this.progress, question.id) + 1;
+
+    panel.markChoiceSelected(question, choiceIndex);
+    this.progress = recordAttempt(this.progress, question.id);
+
+    if (!correct && attemptsAfterThisChoice < MAX_ATTEMPTS) {
+      panel.resetAfterWrongAttempt(question);
+      panel.setFeedback({
+        title: '다시 생각해 봅시다. 남은 기회 1번',
+        body: question.feedbackWrong,
+        footer: '선택지는 다시 초기화되었습니다. 근거를 다시 확인해 보세요.'
+      }, 'wrong');
+      panel.setNextButton('다시 선택', false);
+      this.debugLog('choice-retry', {questionId: question.id, choiceIndex, attempts: attemptsAfterThisChoice});
+      return;
+    }
+
+    this.progress = answerQuestion(this.progress, question.id, choiceIndex);
+    panel.lockWithResult(question, choiceIndex);
+    panel.setFeedback({
+      title: correct ? '정답입니다!' : `정답은 ${question.choices[question.answerIndex]}입니다.`,
+      body: correct ? question.feedbackCorrect : question.explanation,
+      footer: correct ? question.explanation : '해설을 확인한 뒤 다음 문제로 넘어가세요.'
+    }, correct ? 'correct' : 'wrong');
+
+    const nextQuestion = getNextUnansweredQuestion(domain, this.progress);
+    const overall = getOverallStats(this.data, this.progress);
+    panel.setNextButton(overall.complete ? '결과 보기' : nextQuestion ? '다음 문제' : '영역 완료', true);
+    this.updateDomainSelectUi();
+    this.debugLog('choice-locked', {questionId: question.id, correct, attempts: attemptsAfterThisChoice});
+  }
+
+  goNext(panel) {
+    const domain = this.findDomain(panel.domainId);
+    if (!domain || !panel.currentQuestion) return;
+
+    const overall = getOverallStats(this.data, this.progress);
+    if (overall.complete) {
+      this.showReport();
+      return;
+    }
+
+    const nextQuestion = getNextUnansweredQuestion(domain, this.progress);
+    if (nextQuestion) {
+      this.showDomainQuestion(domain, nextQuestion);
+      return;
+    }
+
+    // [연속 방탈출 자동 순간이동 매직] 이 방의 모든 문제가 끝나면 자동으로 다음 방의 자물쇠를 풀고 정면으로 소환합니다!
+    const currentIdx = REQUIRED_DOMAIN_ORDER.indexOf(panel.domainId);
+    if (currentIdx !== -1 && currentIdx < REQUIRED_DOMAIN_ORDER.length - 1) {
+      const nextDomainId = REQUIRED_DOMAIN_ORDER[currentIdx + 1];
+      this.showNotice(`${domain.titleKo} 탈출 성공! 다음 방으로 넘어갑니다.`);
+      this.openDomain(nextDomainId);
+    } else {
+      this.showReport();
+    }
+  }
+
+  showDomainComplete(panel, domain) {
+    if (!panel) return;
+    this.appMode = 'quiz';
+    this.activeDomain = domain.id;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllQuizPanels();
+    if (this.quizShouldFocus !== false) this.focusSection('quiz', domain.id);
+    panel.showComplete(domain, this.getQuizTransform(domain.id));
+    panel.setCloseButton('영역 선택');
+    this.setGroupVisible(panel.el, true);
+    this.markMissionComplete(domain.id);
+    this.updateHomeButtonVisibility();
+  }
+
+  closeQuiz() {
+    this.hideAllQuizPanels();
+    this.showDomainSelect();
+  }
+
+  showReport() {
+    this.appMode = 'report';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.focusSection('report');
+    if (!this.applyClassroomPanelPose(this.resultPanel?.el, 'report', 'progress')) {
+      this.resultPanel?.el?.setAttribute('position', SECTION_POSES.report.position);
+      this.resultPanel?.el?.setAttribute('rotation', SECTION_POSES.report.rotation);
+    }
+    const overall = getOverallStats(this.data, this.progress);
+    const domainStats = Object.fromEntries(this.data.domains.map((domain) => [domain.id, getDomainStats(domain, this.progress)]));
+    this.resultPanel.show(this.data, overall, domainStats);
+    this.setGroupVisible(this.resultPanel.el, true);
+    this.markMissionComplete('report');
+    this.updateHomeButtonVisibility();
+  }
+
+  showSurvey() {
+    this.appMode = 'survey';
+    this.activeDomain = null;
+    this.scene.dataset.appMode = this.appMode;
+    this.hideAllOverlays();
+    this.focusSection('survey');
+    if (!this.applyClassroomPanelPose(this.surveyPanel?.el, 'survey')) {
+      this.surveyPanel?.el?.setAttribute('position', SECTION_POSES.survey.position);
+      this.surveyPanel?.el?.setAttribute('rotation', SECTION_POSES.survey.rotation);
+    }
+    this.surveyPanel.show(this.surveyData, this.surveyResponses);
+    this.setGroupVisible(this.surveyPanel.el, true);
+    this.updateHomeButtonVisibility();
+  }
+
+  saveSurveyAnswer(question, value) {
+    this.surveyResponses = saveSurveyAnswer(this.surveyResponses, question.id, value);
+    this.surveyPanel.updateResponses(this.surveyResponses);
+    if (this.isSurveyComplete()) this.markMissionComplete('survey');
+  }
+
+  restart() {
+    resetProgress();
+    removeItem(MISSION_STATE_KEY);
+    this.missionState = {completed: {}};
+    this.progress = loadProgress();
+    this.hideAllOverlays();
+    this.updateDomainSelectUi();
+    this.showDomainSelect();
+  }
+
+  hideAllOverlays() {
+    if (this.startPanel) {
+      this.startPanel.hide();
+      this.setGroupVisible(this.startPanel.el, false);
+    }
+    if (this.introVideoPanel) {
+      this.introVideoPanel.hide();
+      this.setGroupVisible(this.introVideoPanel.el, false);
+    }
+    this.setGroupVisible(this.domainSelectRoot, false);
+    this.setGroupVisible(this.classroomHotspotRoot, false);
+    if (this.resultPanel) {
+      this.resultPanel.hide();
+      this.setGroupVisible(this.resultPanel.el, false);
+    }
+    if (this.surveyPanel) {
+      this.surveyPanel.hide();
+      this.setGroupVisible(this.surveyPanel.el, false);
+    }
+    this.setGroupVisible(this.placementRoot, false);
+    this.setGroupVisible(this.classroomPanelPlacementRoot, false);
+    this.setGroupVisible(this.classroomPlacementCapture, false);
+    this.setGroupVisible(this.frameworkDetailRoot, false);
+    this.hideAllQuizPanels();
+  }
+
+  hideAllQuizPanels() {
+    this.quizPanels.forEach((panel) => {
+      panel.hide();
+      this.setGroupVisible(panel.el, false);
+    });
+  }
+
+  getQuizTransform(domainId) {
+    const face = STUDIO_FACES[domainId] || STUDIO_FACES.engaging;
+    if (this.isClassroomModeActive()) {
+      const pose = this.getClassroomPose(domainId) || this.getDefaultClassroomPose(domainId);
+      return {
+        ...SINGLE_QUIZ_TRANSFORM,
+        x: pose.position.x,
+        y: SINGLE_QUIZ_TRANSFORM.y,
+        z: pose.position.z,
+        ry: pose.rotation.y
+      };
+    }
+    // [정면 락온 배치] 퀴즈 판넬이 고개 돌린 엉뚱한 곳에 뜨지 않고, 정면 로봇 일러스트 바로 앞에 꽉 붙어서 생성되도록 좌표를 고정합니다.
+    return {
+      ...SINGLE_QUIZ_TRANSFORM,
+      x: 0,
+      y: 2.15,
+      z: -2.30,
+      ry: 0
+    };
+  }
+
+  focusSection(mode, domainId = null) {
+    if (!this.cameraRig) return;
+    if (this.isClassroomModeActive()) {
+      this.debugLog('focus-section-skipped-classroom', {mode, domainId});
+      return;
+    }
+    this.cameraRig.setAttribute('position', '0 1.6 0');
+    
+    // [정면 시선 고정] 카메라가 퀴즈 시작 시 엉뚱한 90도, 180도 방향으로 휙 돌아가는 현상을 강제로 차단하고 무조건 정면(0도)을 보게 합니다.
+    const targetYaw = 0;
+    
+    const lookControls = this.camera?.components?.['look-controls'];
+    if (lookControls?.pitchObject) lookControls.pitchObject.rotation.x = 0;
+    if (lookControls?.yawObject) lookControls.yawObject.rotation.y = 0;
+    this.cameraRig.setAttribute('rotation', `0 ${targetYaw} 0`);
+    if (this.camera) {
+      this.camera.setAttribute('position', '0 0 0');
+      this.camera.setAttribute('rotation', '0 0 0');
+    }
+  }
+
+  exposeRuntimeApi() {
+    window.AILiteracyStudio = {
+      app: this,
+      showStart: () => this.showStart(),
+      showIntroVideo: () => this.showIntroVideo(),
+      confirmIntroVideo: () => this.confirmIntroVideo(),
+      showDomainSelect: () => this.showDomainSelect(),
+      openDomain: (domainId) => this.openDomain(domainId),
+      openPoint: (pointId) => this.openPoint(pointId),
+      showReport: () => this.showReport(),
+      showSurvey: () => this.showSurvey(),
+      showClassroomPlacement: () => this.showClassroomPlacement(),
+      showClassroomPanelPlacement: () => this.showClassroomPanelPlacement(),
+      resetClassroomAnchor: () => this.resetClassroomAnchor(),
+      resetClassroomLayout: () => this.resetClassroomLayout(),
+      reset: () => this.restart(),
+      routeHelp: {
+        skipIntro: '?skipintro=true',
+        skipVideo: '?skipVideo=1',
+        resetVideo: '?resetVideo=1',
+        teacherPreview: '?teacherPreview=1',
+        classroomMode: '?mr=1',
+        resetClassroomAnchor: '?mr=1&resetAnchor=1',
+        resetClassroomLayout: 'AILiteracyStudio.resetClassroomLayout()',
+        openDomain: '?domain=engaging',
+        report: '?view=report',
+        survey: '?view=survey',
+        framework: '?view=framework',
+        point: '?point=engaging',
+        reset: '?reset=true'
+      }
+    };
+  }
+
+  setGroupVisible(group, visible) {
+    if (!group) return;
+    group.setAttribute('visible', visible ? 'true' : 'false');
+    if (group.object3D) group.object3D.visible = Boolean(visible);
+    group.querySelectorAll?.('.interactive, [data-hidden-interactive="true"]').forEach((entity) => {
+      if (visible) {
+        if (entity.dataset.hiddenInteractive === 'true') {
+          entity.classList.add('interactive');
+          delete entity.dataset.hiddenInteractive;
+        }
+        return;
+      }
+      if (entity.classList.contains('interactive')) {
+        entity.classList.remove('interactive');
+        entity.dataset.hiddenInteractive = 'true';
+      }
+    });
+  }
+
+  findDomain(domainId) {
+    return this.data.domains.find((domain) => domain.id === domainId);
+  }
+
+  bindKeyboardControls() {
+    window.addEventListener('keydown', (event) => {
+      const key = String(event.key || '').toLowerCase();
+      const isEnter = key === 'enter' || String(event.code || '').toLowerCase() === 'enter';
+
+      if (this.appMode === 'start' && (isEnter || event.key === ' ' || key === 's')) {
+        this.withRuntimeGuard('영역 선택 시작 키보드', () => this.startPanel.start(() => this.startIntroTransition()));
+        return;
+      }
+
+      if (this.appMode === 'introVideo' && (isEnter || event.key === ' ' || key === 'v')) {
+        this.withRuntimeGuard('사전 영상 확인 키보드', () => this.confirmIntroVideo());
+        return;
+      }
+
+      if (this.appMode === 'placement' && (isEnter || event.key === ' ' || key === 'p')) {
+        this.withRuntimeGuard('교실 기준점 설정 키보드', () => this.setClassroomAnchorFromView());
+        return;
+      }
+
+      if (this.appMode === 'panelPlacement' && (isEnter || event.key === ' ' || key === 'p')) {
+        this.withRuntimeGuard('패널 위치 배치 키보드', () => this.placeNextClassroomPanel());
+        return;
+      }
+
+      if (this.appMode === 'domainSelect') {
+        if (key === 'arrowleft' || key === 'arrowright') {
+          event.preventDefault();
+          this.rotateDomainRing(key === 'arrowright' ? 1 : -1);
+          return;
+        }
+        if (['1', '2', '3', '4'].includes(event.key)) {
+          this.withRuntimeGuard('영역 시작 키보드', () => this.openPoint(REQUIRED_DOMAIN_ORDER[Number(event.key) - 1]));
+          return;
+        }
+        if (key === 'r') this.withRuntimeGuard('리포트 키보드', () => this.openPoint('report'));
+        if (key === 'v' || key === 's') this.withRuntimeGuard('설문 키보드', () => this.openPoint('survey'));
+      }
+
+      if (this.activeDomain && ['1', '2', '3', '4'].includes(event.key)) {
+        const panel = this.quizPanels.get(this.activeDomain);
+        if (panel?.currentQuestion) this.withRuntimeGuard('선택지 키보드', () => this.selectChoice(Number(event.key) - 1, panel, event));
+        return;
+      }
+
+      if ((isEnter || key === 'n') && this.activeDomain) {
+        const panel = this.quizPanels.get(this.activeDomain);
+        if (panel?.currentQuestion && this.progress.answers[panel.currentQuestion.id] !== undefined) {
+          this.withRuntimeGuard('다음 문제 키보드', () => this.goNext(panel));
+        }
+        return;
+      }
+
+      if (this.appMode === 'survey' && ['1', '2', '3', '4', '5'].includes(event.key)) {
+        this.withRuntimeGuard('설문 선택 키보드', () => this.surveyPanel.selectOption(Number(event.key) - 1));
+        return;
+      }
+      if (this.appMode === 'survey' && (isEnter || key === 'n')) {
+        this.withRuntimeGuard('설문 다음 키보드', () => this.surveyPanel.goNext());
+        return;
+      }
+      if (event.key === 'Escape' || key === 'h') {
+        this.withRuntimeGuard('영역 선택 복귀 키보드', () => this.showDomainSelect());
+      }
+    });
+  }
+
+  bindWheelControls() {
+    window.addEventListener('wheel', (event) => {
+      if (this.appMode !== 'domainSelect') return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (Math.abs(delta) < 18) return;
+      const now = Date.now();
+      if (now - this.lastWheelNavigationAt < 430) return;
+      this.lastWheelNavigationAt = now;
+      event.preventDefault();
+      this.rotateDomainRing(delta > 0 ? 1 : -1);
+    }, {passive: false});
+  }
+
+  bindPanelSwipeControls() {
+    window.addEventListener('mousemove', (event) => {
+      if (this.panelSwipeState?.source !== 'pointer') return;
+      this.updatePanelSwipePreview(this.getPointerX(event));
+    });
+
+    window.addEventListener('mouseup', (event) => {
+      if (this.panelSwipeState?.source !== 'pointer') return;
+      this.endPointerPanelSwipe(event);
+    });
+
+    window.addEventListener('touchmove', (event) => {
+      if (this.panelSwipeState?.source !== 'pointer') return;
+      this.updatePanelSwipePreview(this.getPointerX(event));
+    }, {passive: true});
+
+    window.addEventListener('touchend', (event) => {
+      if (this.panelSwipeState?.source !== 'pointer') return;
+      this.endPointerPanelSwipe(event);
+    });
+
+    [this.leftHand, this.rightHand].filter(Boolean).forEach((hand) => {
+      ['triggerdown', 'gripdown'].forEach((eventName) => {
+        hand.addEventListener(eventName, (event) => this.beginControllerPanelSwipe(hand, event));
+      });
+      ['triggerup', 'gripup'].forEach((eventName) => {
+        hand.addEventListener(eventName, (event) => this.endControllerPanelSwipe(hand, event));
+      });
+    });
+  }
+
+  getPointerX(event) {
+    const source = event?.changedTouches?.[0] || event?.touches?.[0] || event?.detail?.mouseEvent || event;
+    return Number(source?.clientX ?? 0);
+  }
+
+  isControllerCursorEvent(event) {
+    return Boolean(
+      event?.detail?.cursorEl &&
+      !event?.detail?.mouseEvent &&
+      event?.clientX === undefined &&
+      !event?.touches?.length &&
+      !event?.changedTouches?.length
+    );
+  }
+
+  beginPanelSwipe({
+    source,
+    handle,
+    fallbackDirection = 1,
+    pointerX = 0,
+    controllerPosition = null,
+    requireThreshold = false,
+    suppressTarget = null
+  }) {
+    if (this.appMode !== 'domainSelect') return;
+    const now = Date.now();
+    if (now - this.lastPanelSwipeAt < PANEL_SWIPE_COOLDOWN_MS) return;
+    const swipeRoot = handle?._swipeRoot || handle;
+    const basePosition = swipeRoot?.getAttribute?.('position') || {x: 0, y: 0, z: 0};
+    this.panelSwipeState = {
+      source,
+      handle: swipeRoot,
+      fallbackDirection,
+      requireThreshold,
+      suppressTarget,
+      startPointerX: pointerX,
+      lastPointerX: pointerX,
+      basePosition: {
+        x: Number(basePosition.x || 0),
+        y: Number(basePosition.y || 0),
+        z: Number(basePosition.z || 0)
+      },
+      startControllerPosition: controllerPosition,
+      moved: false,
+      startedAt: now
+    };
+    this.setSwipeHandleActive(swipeRoot, true);
+  }
+
+  updatePanelSwipePreview(pointerX) {
+    if (!this.panelSwipeState) return;
+    const delta = pointerX - this.panelSwipeState.startPointerX;
+    this.panelSwipeState.lastPointerX = pointerX;
+    this.panelSwipeState.moved = Math.abs(delta) >= 8;
+    const handle = this.panelSwipeState.handle;
+    if (handle?._swipeGrip) {
+      const base = this.panelSwipeState.basePosition || {x: 0, y: 0, z: 0};
+      const offset = Math.max(-0.08, Math.min(0.08, delta / 780));
+      handle.setAttribute('position', `${(base.x + offset).toFixed(3)} ${base.y.toFixed(3)} ${base.z.toFixed(3)}`);
+    }
+  }
+
+  endPointerPanelSwipe(event) {
+    if (!this.panelSwipeState) return;
+    const pointerX = this.getPointerX(event);
+    const delta = pointerX - this.panelSwipeState.startPointerX;
+    const reachedThreshold = Math.abs(delta) >= PANEL_SWIPE_MOUSE_THRESHOLD;
+    if (!reachedThreshold && this.panelSwipeState.requireThreshold) {
+      this.cancelPanelSwipe('pointer-cancel');
+      return;
+    }
+    const direction = reachedThreshold ? (delta < 0 ? 1 : -1) : this.panelSwipeState.fallbackDirection;
+    const reason = reachedThreshold ? 'pointer-swipe' : 'pointer-tap';
+    this.finishPanelSwipe(direction, reason);
+  }
+
+  beginControllerPanelSwipe(hand, event) {
+    if (this.appMode !== 'domainSelect') return;
+    const target = this.getIntersectedSwipeTarget(hand);
+    if (!target) return;
+    const isSurface = target.dataset?.swipeSurface === 'true';
+    this.beginPanelSwipe({
+      source: 'controller',
+      handle: target,
+      fallbackDirection: isSurface ? 0 : Number(target.dataset.fallbackDirection || target._swipeRoot?.dataset?.fallbackDirection || 1),
+      controllerPosition: this.getObjectWorldPosition(hand),
+      requireThreshold: isSurface,
+      suppressTarget: isSurface ? target : null
+    });
+    event?.stopPropagation?.();
+  }
+
+  endControllerPanelSwipe(hand, event) {
+    if (this.panelSwipeState?.source !== 'controller') return;
+    const start = this.panelSwipeState.startControllerPosition;
+    const end = this.getObjectWorldPosition(hand);
+    const rightDelta = start && end ? this.getCameraRightDelta(start, end) : 0;
+    const reachedThreshold = Math.abs(rightDelta) >= PANEL_SWIPE_CONTROLLER_THRESHOLD;
+    if (!reachedThreshold && this.panelSwipeState.requireThreshold) {
+      this.cancelPanelSwipe('controller-cancel');
+      return;
+    }
+    const direction = reachedThreshold ? (rightDelta < 0 ? 1 : -1) : this.panelSwipeState.fallbackDirection;
+    const reason = reachedThreshold ? 'controller-swipe' : 'controller-tap';
+    this.finishPanelSwipe(direction, reason);
+    event?.stopPropagation?.();
+  }
+
+  getIntersectedSwipeTarget(hand) {
+    const intersectedEls = hand?.components?.raycaster?.intersectedEls || [];
+    return intersectedEls.find((entity) => (
+      entity?.dataset?.swipeHandle === 'true' ||
+      entity?.dataset?.swipeSurface === 'true' ||
+      entity?._swipeRoot?.dataset?.swipeHandle === 'true' ||
+      entity?.classList?.contains('panel-swipe-handle')
+    ));
+  }
+
+  getObjectWorldPosition(entity) {
+    const THREE = window.AFRAME?.THREE || window.THREE;
+    if (!THREE || !entity?.object3D) return null;
+    const position = new THREE.Vector3();
+    entity.object3D.getWorldPosition(position);
+    return position;
+  }
+
+  getCameraRightDelta(start, end) {
+    const THREE = window.AFRAME?.THREE || window.THREE;
+    if (!THREE || !start || !end) return 0;
+    const quaternion = new THREE.Quaternion();
+    this.camera?.object3D?.getWorldQuaternion(quaternion);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion).normalize();
+    return end.clone().sub(start).dot(right);
+  }
+
+  finishPanelSwipe(direction, reason = 'swipe') {
+    const state = this.panelSwipeState;
+    if (!state) return;
+    this.panelSwipeState = null;
+    this.lastPanelSwipeAt = Date.now();
+    if (state.handle && state.basePosition) {
+      state.handle.setAttribute('position', `${state.basePosition.x} ${state.basePosition.y} ${state.basePosition.z}`);
+    }
+    this.setSwipeHandleActive(state.handle, false);
+    if (state.handle) state.handle.dataset.lastSwipeEndedAt = String(Date.now());
+    if (state.suppressTarget && reason.includes('swipe')) {
+      state.suppressTarget.dataset.suppressClickUntil = String(Date.now() + 360);
+    }
+    this.completePanelSwipe(direction, reason);
+  }
+
+  cancelPanelSwipe(reason = 'cancel') {
+    const state = this.panelSwipeState;
+    if (!state) return;
+    this.panelSwipeState = null;
+    if (state.handle && state.basePosition) {
+      state.handle.setAttribute('position', `${state.basePosition.x} ${state.basePosition.y} ${state.basePosition.z}`);
+    }
+    this.setSwipeHandleActive(state.handle, false);
+  }
+
+  completePanelSwipe(direction, reason = 'swipe') {
+    if (this.appMode !== 'domainSelect') return;
+    this.rotateDomainRing(direction);
+  }
+
+  setSwipeHandleActive(handle, active) {
+    if (!handle) return;
+    const accent = handle.dataset.accent || '#7dd3fc';
+    const grip = handle._swipeGrip;
+    if (grip) {
+      grip.setAttribute(
+        'material',
+        `color: ${accent}; shader: flat; transparent: true; opacity: ${active ? 1 : 0.52}; side: double`
+      );
+    }
+    handle.removeAttribute('animation__swipe_focus');
+    handle.setAttribute('scale', active ? '1.14 1.14 1' : '1 1 1');
+  }
+
+  box(id, widthHeightDepth, position, color) {
+    const box = document.createElement('a-box');
+    box.id = id;
+    const [width, height, depth] = widthHeightDepth.split(' ');
+    box.setAttribute('width', width);
+    box.setAttribute('height', height);
+    box.setAttribute('depth', depth);
+    box.setAttribute('position', position);
+    box.setAttribute('material', `color: ${color}; roughness: 0.82; metalness: 0.05`);
+    return box;
+  }
+
+  deepMerge(base, override) {
+    if (!override || typeof override !== 'object' || Array.isArray(override)) return {...base};
+    const next = {...base};
+    Object.entries(override).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        next[key] = this.deepMerge(next[key] || {}, value);
+      } else {
+        next[key] = value;
+      }
+    });
+    return next;
+  }
+
+  withRuntimeGuard(label, action) {
+    try {
+      const result = action();
+      if (result && typeof result.catch === 'function') {
+        result
+          .catch((error) => this.showRuntimeError(error, label))
+          .finally(() => this.updateHomeButtonVisibility());
+      } else {
+        this.updateHomeButtonVisibility();
+      }
+      return result;
+    } catch (error) {
+      this.showRuntimeError(error, label);
+      this.updateHomeButtonVisibility();
+      return null;
+    }
+  }
+
+  debugLog(label, payload = {}) {
+    if (!this.debug) return;
+    if (this.scene) {
+      this.scene.dataset.lastDebug = label;
+      this.scene.dataset.lastDebugPayload = JSON.stringify(payload);
+    }
+  }
+
+  showNotice(message) {
+    this.showRuntimeWarning(message, '안내');
+  }
+
+  setLoading(message) {
+    this.root.innerHTML = `<main class="system-message">${message}</main>`;
+  }
+
+  setError(message) {
+    const safeMessage = String(message).replace(/[<>&]/g, (char) => ({'<': '&lt;', '>': '&gt;', '&': '&amp;'})[char]);
+    this.root.innerHTML = `<main class="system-message error"><strong>실행 오류</strong><pre>${safeMessage}</pre></main>`;
+  }
+
+  showRuntimeError(error, label = '실행 중 오류') {
+    console.error(`[AI Literacy Studio] ${label}`, error);
+    const message = error?.message || String(error);
+    let overlay = document.querySelector('#runtime-error');
+    if (!overlay) {
+      overlay = document.createElement('aside');
+      overlay.id = 'runtime-error';
+      overlay.className = 'runtime-error';
+      document.body.appendChild(overlay);
+    }
+    overlay.textContent = `${label}: ${message}`;
+    window.setTimeout(() => {
+      if (overlay) overlay.remove();
+    }, 6000);
+  }
+
+  showRuntimeWarning(message, label = '안내') {
+    let overlay = document.querySelector('#runtime-warning');
+    if (!overlay) {
+      overlay = document.createElement('aside');
+      overlay.id = 'runtime-warning';
+      overlay.className = 'runtime-error runtime-warning';
+      document.body.appendChild(overlay);
+    }
+    overlay.textContent = `${label}: ${message}`;
+    window.setTimeout(() => {
+      if (overlay) overlay.remove();
+    }, 6000);
+  }
+}
